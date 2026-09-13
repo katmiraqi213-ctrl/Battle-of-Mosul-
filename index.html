@@ -2,15 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-
-<title>الموصل - الحضر</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>الموصل → الحضر</title>
 
 <style>
 html,body{
     margin:0;
-    padding:0;
     width:100%;
     height:100%;
     overflow:hidden;
@@ -34,64 +31,40 @@ canvas{
     pointer-events:none;
 }
 
-.panel{
-    display:inline-block;
-    background:rgba(0,0,0,.65);
+.box{
+    display:block;
+    width:max-content;
+    max-width:90%;
+    background:rgba(0,0,0,.68);
     color:white;
-    padding:10px 14px;
-    border-radius:14px;
+    padding:9px 13px;
     margin-bottom:6px;
-    box-shadow:0 3px 12px rgba(0,0,0,.3);
+    border-radius:13px;
+    box-shadow:0 3px 10px rgba(0,0,0,.3);
 }
 
 #title{
-    font-size:20px;
+    font-size:21px;
     font-weight:bold;
-}
-
-#location{
-    font-size:16px;
-}
-
-#mission{
-    font-size:14px;
-}
-
-#speed{
-    font-size:14px;
-}
-
-#error{
-    position:fixed;
-    inset:0;
-    display:none;
-    z-index:100;
-    background:#111;
-    color:white;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:25px;
-    font-size:18px;
 }
 
 #controls{
     position:fixed;
-    bottom:22px;
+    bottom:20px;
     left:50%;
     transform:translateX(-50%);
-    z-index:20;
     width:210px;
-    height:170px;
+    height:160px;
+    z-index:20;
 }
 
 .btn{
     position:absolute;
-    width:62px;
-    height:62px;
+    width:60px;
+    height:60px;
     border-radius:50%;
-    border:2px solid rgba(255,255,255,.6);
-    background:rgba(0,0,0,.6);
+    background:rgba(0,0,0,.65);
+    border:2px solid rgba(255,255,255,.65);
     color:white;
     font-size:28px;
     display:flex;
@@ -99,45 +72,12 @@ canvas{
     justify-content:center;
     user-select:none;
     -webkit-user-select:none;
-    box-shadow:0 4px 12px rgba(0,0,0,.35);
 }
 
-.btn:active{
-    background:rgba(255,255,255,.35);
-}
-
-#up{
-    top:0;
-    left:74px;
-}
-
-#left{
-    top:70px;
-    left:5px;
-}
-
-#down{
-    top:70px;
-    left:74px;
-}
-
-#right{
-    top:70px;
-    left:143px;
-}
-
-#hint{
-    position:fixed;
-    bottom:5px;
-    left:50%;
-    transform:translateX(-50%);
-    color:white;
-    background:rgba(0,0,0,.45);
-    padding:5px 10px;
-    border-radius:10px;
-    font-size:11px;
-    z-index:15;
-}
+#up{top:0;left:75px}
+#left{top:70px;left:5px}
+#down{top:70px;left:75px}
+#right{top:70px;left:145px}
 </style>
 </head>
 
@@ -146,1172 +86,766 @@ canvas{
 <canvas id="game"></canvas>
 
 <div id="hud">
-
-    <div class="panel" id="title">
-        🇮🇶 الموصل → الحضر
-    </div>
-    <br>
-
-    <div class="panel" id="location">
-        🏙️ مدينة الموصل
-    </div>
-    <br>
-
-    <div class="panel" id="mission">
-        🎯 المهمة: توجه إلى آثار الحضر
-    </div>
-    <br>
-
-    <div class="panel" id="speed">
-        🚗 السرعة: 0
-    </div>
-
-</div>
-
-<div id="error">
-    <div>
-        <h2>حدث خطأ في تشغيل اللعبة</h2>
-        <p id="errorText"></p>
-    </div>
+    <div class="box" id="title">🇮🇶 الموصل → الحضر</div>
+    <div class="box" id="location">🏙️ مدينة الموصل</div>
+    <div class="box">🎯 المهمة: الوصول إلى آثار الحضر</div>
+    <div class="box" id="speed">🚗 السرعة: 0</div>
 </div>
 
 <div id="controls">
-
     <div class="btn" id="up">▲</div>
     <div class="btn" id="left">◀</div>
     <div class="btn" id="down">▼</div>
     <div class="btn" id="right">▶</div>
-
-</div>
-
-<div id="hint">
-    تحكم بالسيارة بالأسهم أو الأزرار
 </div>
 
 <script>
-
 "use strict";
 
-/* =========================================================
-   CANVAS / WEBGL
-========================================================= */
+/* =========================
+   CANVAS
+========================= */
 
-const canvas = document.getElementById("game");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-let gl;
+let W=innerWidth;
+let H=innerHeight;
 
-try{
-    gl =
-        canvas.getContext("webgl") ||
-        canvas.getContext("experimental-webgl");
+function resize(){
+    W=innerWidth;
+    H=innerHeight;
 
-    if(!gl){
-        throw new Error("WebGL غير مدعوم على هذا الجهاز");
-    }
+    const dpr=Math.min(devicePixelRatio||1,2);
 
-}catch(e){
+    canvas.width=W*dpr;
+    canvas.height=H*dpr;
 
-    document.getElementById("error").style.display="flex";
+    canvas.style.width=W+"px";
+    canvas.style.height=H+"px";
 
-    document.getElementById("errorText").innerText =
-        "جهازك أو المتصفح لا يدعم WebGL.";
-
-    throw e;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 
+addEventListener("resize",resize);
+resize();
 
-/* =========================================================
-   SHADERS
-========================================================= */
 
-const vertexShaderSource = `
-
-attribute vec3 aPosition;
-attribute vec3 aNormal;
-
-uniform mat4 uProjection;
-uniform mat4 uView;
-uniform mat4 uModel;
-
-varying vec3 vNormal;
-
-void main(){
-
-    vec4 worldPosition =
-        uModel * vec4(aPosition,1.0);
-
-    vNormal =
-        mat3(uModel) * aNormal;
-
-    gl_Position =
-        uProjection *
-        uView *
-        worldPosition;
-}
-`;
-
-
-const fragmentShaderSource = `
-
-precision mediump float;
-
-uniform vec4 uColor;
-
-varying vec3 vNormal;
-
-void main(){
-
-    vec3 light =
-        normalize(vec3(-0.4,0.8,0.5));
-
-    float brightness =
-        max(dot(normalize(vNormal),light),0.25);
-
-    gl_FragColor =
-        vec4(uColor.rgb * brightness,uColor.a);
-}
-`;
-
-
-/* =========================================================
-   SHADER COMPILE
-========================================================= */
-
-function compileShader(type,source){
-
-    const shader =
-        gl.createShader(type);
-
-    gl.shaderSource(shader,source);
-
-    gl.compileShader(shader);
-
-    if(!gl.getShaderParameter(
-        shader,
-        gl.COMPILE_STATUS
-    )){
-
-        throw new Error(
-            gl.getShaderInfoLog(shader)
-        );
-    }
-
-    return shader;
-}
-
-
-function createProgram(){
-
-    const vs =
-        compileShader(
-            gl.VERTEX_SHADER,
-            vertexShaderSource
-        );
-
-    const fs =
-        compileShader(
-            gl.FRAGMENT_SHADER,
-            fragmentShaderSource
-        );
-
-    const program =
-        gl.createProgram();
-
-    gl.attachShader(program,vs);
-    gl.attachShader(program,fs);
-
-    gl.linkProgram(program);
-
-    if(!gl.getProgramParameter(
-        program,
-        gl.LINK_STATUS
-    )){
-
-        throw new Error(
-            gl.getProgramInfoLog(program)
-        );
-    }
-
-    return program;
-}
-
-
-let program;
-
-try{
-
-    program=createProgram();
-
-}catch(e){
-
-    document.getElementById("error").style.display="flex";
-
-    document.getElementById("errorText").innerText =
-        e.message;
-
-    throw e;
-}
-
-
-gl.useProgram(program);
-
-
-/* =========================================================
-   LOCATIONS
-========================================================= */
-
-const aPosition =
-    gl.getAttribLocation(
-        program,
-        "aPosition"
-    );
-
-const aNormal =
-    gl.getAttribLocation(
-        program,
-        "aNormal"
-    );
-
-const uProjection =
-    gl.getUniformLocation(
-        program,
-        "uProjection"
-    );
-
-const uView =
-    gl.getUniformLocation(
-        program,
-        "uView"
-    );
-
-const uModel =
-    gl.getUniformLocation(
-        program,
-        "uModel"
-    );
-
-const uColor =
-    gl.getUniformLocation(
-        program,
-        "uColor"
-    );
-
-
-/* =========================================================
-   MATRIX FUNCTIONS
-========================================================= */
-
-function identity(){
-
-    return [
-
-        1,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        0,0,0,1
-
-    ];
-}
-
-
-function multiply(a,b){
-
-    const r=new Array(16);
-
-    for(let row=0;row<4;row++){
-
-        for(let col=0;col<4;col++){
-
-            r[col*4+row]=
-
-                a[0*4+row]*b[col*4+0]+
-                a[1*4+row]*b[col*4+1]+
-                a[2*4+row]*b[col*4+2]+
-                a[3*4+row]*b[col*4+3];
-        }
-    }
-
-    return r;
-}
-
-
-function translation(x,y,z){
-
-    const m=identity();
-
-    m[12]=x;
-    m[13]=y;
-    m[14]=z;
-
-    return m;
-}
-
-
-function scale(x,y,z){
-
-    const m=identity();
-
-    m[0]=x;
-    m[5]=y;
-    m[10]=z;
-
-    return m;
-}
-
-
-function rotationY(a){
-
-    const c=Math.cos(a);
-    const s=Math.sin(a);
-
-    return [
-
-         c,0,-s,0,
-         0,1, 0,0,
-         s,0, c,0,
-         0,0, 0,1
-
-    ];
-}
-
-
-function perspective(
-    fov,
-    aspect,
-    near,
-    far
-){
-
-    const f=
-        1/Math.tan(fov/2);
-
-    const nf=
-        1/(near-far);
-
-    return [
-
-        f/aspect,0,0,0,
-
-        0,f,0,0,
-
-        0,0,(far+near)*nf,-1,
-
-        0,0,(2*far*near)*nf,0
-    ];
-}
-
-
-function cameraMatrix(
-    eye,
-    target
-){
-
-    let zx=
-        eye[0]-target[0];
-
-    let zy=
-        eye[1]-target[1];
-
-    let zz=
-        eye[2]-target[2];
-
-    let zl=
-        Math.sqrt(
-            zx*zx+
-            zy*zy+
-            zz*zz
-        );
-
-    zx/=zl;
-    zy/=zl;
-    zz/=zl;
-
-
-    let xx=0;
-    let xy=1;
-    let xz=0;
-
-
-    let xx2=
-        xy*zz-
-        xz*zy;
-
-    let xy2=
-        xz*zx-
-        xx*zz;
-
-    let xz2=
-        xx*zy-
-        xy*zx;
-
-
-    let xl=
-        Math.sqrt(
-            xx2*xx2+
-            xy2*xy2+
-            xz2*xz2
-        );
-
-    xx2/=xl;
-    xy2/=xl;
-    xz2/=xl;
-
-
-    let yx=
-        zy*xz2-
-        zz*xy2;
-
-    let yy=
-        zz*xx2-
-        zx*xz2;
-
-    let yz=
-        zx*xy2-
-        zy*xx2;
-
-
-    return [
-
-        xx2,yx,zx,0,
-
-        xy2,yy,zy,0,
-
-        xz2,yz,zz,0,
-
-        -(xx2*eye[0]+
-          xy2*eye[1]+
-          xz2*eye[2]),
-
-        -(yx*eye[0]+
-          yy*eye[1]+
-          yz*eye[2]),
-
-        -(zx*eye[0]+
-          zy*eye[1]+
-          zz*eye[2]),
-
-        1
-    ];
-}
-
-
-/* =========================================================
-   CUBE
-========================================================= */
-
-const cubeVertices = new Float32Array([
-
-    // Front
-    -1,-1, 1,   1,-1, 1,   1, 1, 1,
-    -1,-1, 1,   1, 1, 1,  -1, 1, 1,
-
-    // Back
-     1,-1,-1,  -1,-1,-1,  -1, 1,-1,
-     1,-1,-1,  -1, 1,-1,   1, 1,-1,
-
-    // Left
-    -1,-1,-1,  -1,-1, 1,  -1, 1, 1,
-    -1,-1,-1,  -1, 1, 1,  -1, 1,-1,
-
-    // Right
-     1,-1, 1,   1,-1,-1,   1, 1,-1,
-     1,-1, 1,   1, 1,-1,   1, 1, 1,
-
-    // Top
-    -1, 1, 1,   1, 1, 1,   1, 1,-1,
-    -1, 1, 1,   1, 1,-1,  -1, 1,-1,
-
-    // Bottom
-    -1,-1,-1,   1,-1,-1,   1,-1, 1,
-    -1,-1,-1,   1,-1, 1,  -1,-1, 1
-]);
-
-
-const cubeNormals = new Float32Array([
-
-    // Front
-    0,0,1,
-    0,0,1,
-    0,0,1,
-    0,0,1,
-    0,0,1,
-    0,0,1,
-
-    // Back
-    0,0,-1,
-    0,0,-1,
-    0,0,-1,
-    0,0,-1,
-    0,0,-1,
-    0,0,-1,
-
-    // Left
-    -1,0,0,
-    -1,0,0,
-    -1,0,0,
-    -1,0,0,
-    -1,0,0,
-    -1,0,0,
-
-    // Right
-    1,0,0,
-    1,0,0,
-    1,0,0,
-    1,0,0,
-    1,0,0,
-    1,0,0,
-
-    // Top
-    0,1,0,
-    0,1,0,
-    0,1,0,
-    0,1,0,
-    0,1,0,
-    0,1,0,
-
-    // Bottom
-    0,-1,0,
-    0,-1,0,
-    0,-1,0,
-    0,-1,0,
-    0,-1,0,
-    0,-1,0
-]);
-
-
-const positionBuffer =
-    gl.createBuffer();
-
-gl.bindBuffer(
-    gl.ARRAY_BUFFER,
-    positionBuffer
-);
-
-gl.bufferData(
-    gl.ARRAY_BUFFER,
-    cubeVertices,
-    gl.STATIC_DRAW
-);
-
-
-const normalBuffer =
-    gl.createBuffer();
-
-gl.bindBuffer(
-    gl.ARRAY_BUFFER,
-    normalBuffer
-);
-
-gl.bufferData(
-    gl.ARRAY_BUFFER,
-    cubeNormals,
-    gl.STATIC_DRAW
-);
-
-
-/* =========================================================
-   DRAW CUBE
-========================================================= */
-
-function drawCube(
-    x,y,z,
-    sx,sy,sz,
-    color,
-    rot=0
-){
-
-    let model=
-        translation(x,y,z);
-
-    model=
-        multiply(
-            model,
-            rotationY(rot)
-        );
-
-    model=
-        multiply(
-            model,
-            scale(sx,sy,sz)
-        );
-
-
-    gl.uniformMatrix4fv(
-        uModel,
-        false,
-        new Float32Array(model)
-    );
-
-
-    gl.uniform4fv(
-        uColor,
-        new Float32Array([
-            color[0],
-            color[1],
-            color[2],
-            1
-        ])
-    );
-
-
-    gl.bindBuffer(
-        gl.ARRAY_BUFFER,
-        positionBuffer
-    );
-
-    gl.enableVertexAttribArray(
-        aPosition
-    );
-
-    gl.vertexAttribPointer(
-        aPosition,
-        3,
-        gl.FLOAT,
-        false,
-        0,
-        0
-    );
-
-
-    gl.bindBuffer(
-        gl.ARRAY_BUFFER,
-        normalBuffer
-    );
-
-    gl.enableVertexAttribArray(
-        aNormal
-    );
-
-    gl.vertexAttribPointer(
-        aNormal,
-        3,
-        gl.FLOAT,
-        false,
-        0,
-        0
-    );
-
-
-    gl.drawArrays(
-        gl.TRIANGLES,
-        0,
-        36
-    );
-}
-
-
-/* =========================================================
-   GROUND
-========================================================= */
-
-function ground(){
-
-    drawCube(
-        0,
-        -3,
-        -250,
-        500,
-        3,
-        500,
-        [0.63,0.48,0.28]
-    );
-}
-
-
-/* =========================================================
-   ROAD
-========================================================= */
-
-function road(){
-
-    drawCube(
-        0,
-        0.05,
-        -250,
-        14,
-        0.1,
-        500,
-        [0.08,0.08,0.08]
-    );
-
-
-    for(
-        let z=180;
-        z>-680;
-        z-=18
-    ){
-
-        drawCube(
-            0,
-            0.18,
-            z,
-            0.35,
-            0.04,
-            5,
-            [0.95,0.85,0.35]
-        );
-    }
-
-
-    // Side roads
-    drawCube(
-        -80,
-        0.08,
-        120,
-        50,
-        0.1,
-        5,
-        [0.08,0.08,0.08]
-    );
-
-    drawCube(
-        80,
-        0.08,
-        40,
-        50,
-        0.1,
-        5,
-        [0.08,0.08,0.08]
-    );
-}
-
-
-/* =========================================================
-   BUILDING
-========================================================= */
-
-function building(
-    x,
-    z,
-    w,
-    h,
-    d,
-    color
-){
-
-    drawCube(
-        x,
-        h,
-        z,
-        w,
-        h,
-        d,
-        color
-    );
-
-
-    // roof
-    drawCube(
-        x,
-        h*2+0.4,
-        z,
-        w+0.3,
-        0.4,
-        d+0.3,
-        [
-            color[0]*0.75,
-            color[1]*0.75,
-            color[2]*0.75
-        ]
-    );
-}
-
-
-/* =========================================================
-   MOSUL
-========================================================= */
-
-function mosul(){
-
-    for(
-        let z=180;
-        z>80;
-        z-=25
-    ){
-
-        building(
-            -32,
-            z,
-            8,
-            5,
-            8,
-            [0.72,0.63,0.48]
-        );
-
-        building(
-            32,
-            z-10,
-            9,
-            6,
-            8,
-            [0.67,0.58,0.44]
-        );
-    }
-
-
-    for(
-        let z=70;
-        z>25;
-        z-=22
-    ){
-
-        building(
-            -32,
-            z,
-            9,
-            7,
-            9,
-            [0.72,0.65,0.55]
-        );
-
-        building(
-            32,
-            z,
-            9,
-            5,
-            9,
-            [0.63,0.55,0.43]
-        );
-    }
-}
-
-
-/* =========================================================
-   RIVER
-========================================================= */
-
-function river(){
-
-    drawCube(
-        70,
-        -0.1,
-        110,
-        25,
-        0.05,
-        70,
-        [0.05,0.35,0.65]
-    );
-}
-
-
-/* =========================================================
-   BRIDGE
-========================================================= */
-
-function bridge(){
-
-    drawCube(
-        0,
-        1.2,
-        110,
-        45,
-        0.8,
-        7,
-        [0.35,0.35,0.35]
-    );
-
-
-    for(
-        let x=-40;
-        x<=40;
-        x+=10
-    ){
-
-        drawCube(
-            x,
-            0.5,
-            110,
-            1,
-            1.5,
-            3,
-            [0.25,0.25,0.25]
-        );
-    }
-}
-
-
-/* =========================================================
-   TREES
-========================================================= */
-
-function tree(x,z){
-
-    drawCube(
-        x,
-        3,
-        z,
-        0.8,
-        3,
-        0.8,
-        [0.30,0.16,0.06]
-    );
-
-    drawCube(
-        x,
-        7,
-        z,
-        3,
-        3,
-        3,
-        [0.08,0.38,0.12]
-    );
-}
-
-
-/* =========================================================
-   HATRA DISTRICT
-========================================================= */
-
-function hatraDistrict(){
-
-    for(
-        let x=-65;
-        x<=65;
-        x+=32
-    ){
-
-        building(
-            x,
-            -520,
-            9,
-            5,
-            9,
-            [0.67,0.52,0.36]
-        );
-    }
-
-
-    for(
-        let x=-65;
-        x<=65;
-        x+=32
-    ){
-
-        building(
-            x,
-            -575,
-            10,
-            6,
-            9,
-            [0.73,0.57,0.39]
-        );
-    }
-
-
-    // gate towers
-    drawCube(
-        -18,
-        10,
-        -470,
-        7,
-        10,
-        7,
-        [0.52,0.32,0.17]
-    );
-
-    drawCube(
-        18,
-        10,
-        -470,
-        7,
-        10,
-        7,
-        [0.52,0.32,0.17]
-    );
-
-    drawCube(
-        0,
-        15,
-        -470,
-        18,
-        3,
-        5,
-        [0.58,0.38,0.20]
-    );
-}
-
-
-/* =========================================================
-   HATRA ARCHAEOLOGICAL CITY
-========================================================= */
-
-function hatraRuins(){
-
-    // Main temple
-    drawCube(
-        0,
-        7,
-        -735,
-        18,
-        7,
-        12,
-        [0.72,0.58,0.38]
-    );
-
-
-    // columns
-    for(
-        let x=-15;
-        x<=15;
-        x+=7.5
-    ){
-
-        drawCube(
-            x,
-            8,
-            -715,
-            2,
-            8,
-            2,
-            [0.82,0.68,0.45]
-        );
-
-        drawCube(
-            x,
-            8,
-            -755,
-            2,
-            8,
-            2,
-            [0.82,0.68,0.45]
-        );
-    }
-
-
-    // smaller ruins
-    for(
-        let x=-60;
-        x<=60;
-        x+=20
-    ){
-
-        drawCube(
-            x,
-            3,
-            -800,
-            5,
-            3,
-            5,
-            [0.60,0.46,0.30]
-        );
-    }
-}
-
-
-/* =========================================================
-   DECORATION
-========================================================= */
-
-function decorations(){
-
-    for(
-        let z=160;
-        z>-650;
-        z-=45
-    ){
-
-        tree(-24,z);
-        tree(24,z-18);
-    }
-}
-
-
-/* =========================================================
-   CAR
-========================================================= */
+/* =========================
+   PLAYER
+========================= */
 
 const car={
     x:0,
-    y:1.8,
-    z:150,
+    z:0,
     angle:0,
     speed:0
 };
 
 
+/* =========================
+   WORLD
+========================= */
+
+const objects=[];
+
+function addBuilding(x,z,w,h,d,color){
+    objects.push({
+        type:"building",
+        x,z,w,h,d,color
+    });
+}
+
+function addTree(x,z){
+    objects.push({
+        type:"tree",
+        x,z
+    });
+}
+
+function addRock(x,z,s){
+    objects.push({
+        type:"rock",
+        x,z,s
+    });
+}
+
+
+/* =========================
+   MOSUL
+========================= */
+
+for(let z=-80;z>-420;z-=55){
+
+    addBuilding(-35,z,20,20,20,"#b99b70");
+    addBuilding(35,z-20,22,25,22,"#a88962");
+
+    addTree(-65,z);
+    addTree(65,z-20);
+}
+
+
+/* =========================
+   ROAD BUILDINGS
+========================= */
+
+for(let z=-450;z>-900;z-=70){
+
+    addBuilding(-55,z,25,16,25,"#b68c5d");
+    addBuilding(55,z-30,25,18,25,"#c29a68");
+
+    addTree(-85,z);
+    addTree(85,z-25);
+}
+
+
+/* =========================
+   HATRA DISTRICT
+========================= */
+
+for(let x=-80;x<=80;x+=40){
+
+    addBuilding(
+        x,
+        -930,
+        25,
+        20,
+        25,
+        "#a97845"
+    );
+}
+
+for(let x=-70;x<=70;x+=35){
+
+    addTree(x,-1000);
+}
+
+
+/* =========================
+   ROCKS
+========================= */
+
+for(let i=0;i<50;i++){
+
+    const x=(Math.random()*500)-250;
+    const z=-(Math.random()*1500);
+
+    if(Math.abs(x)>25){
+        addRock(
+            x,
+            z,
+            3+Math.random()*6
+        );
+    }
+}
+
+
+/* =========================
+   DRAW SKY
+========================= */
+
+function drawSky(){
+
+    const gradient=ctx.createLinearGradient(
+        0,0,
+        0,H
+    );
+
+    gradient.addColorStop(0,"#54a9e8");
+    gradient.addColorStop(.55,"#9ed8f5");
+    gradient.addColorStop(1,"#d9efc4");
+
+    ctx.fillStyle=gradient;
+    ctx.fillRect(0,0,W,H);
+
+    /* الشمس */
+
+    ctx.fillStyle="rgba(255,230,120,.9)";
+    ctx.beginPath();
+    ctx.arc(
+        W-80,
+        80,
+        35,
+        0,
+        Math.PI*2
+    );
+    ctx.fill();
+}
+
+
+/* =========================
+   CAMERA
+========================= */
+
+function worldToScreen(x,z){
+
+    const dx=x-car.x;
+    const dz=z-car.z;
+
+    const sin=Math.sin(car.angle);
+    const cos=Math.cos(car.angle);
+
+    const forward=
+        -dx*sin+
+        -dz*cos;
+
+    const side=
+        dx*cos-
+        dz*sin;
+
+    const depth=forward+30;
+
+    if(depth<=1){
+        return null;
+    }
+
+    const scale=
+        420/depth;
+
+    return{
+        x:W/2+side*scale,
+        y:H*.48-forward*scale*.72,
+        scale
+    };
+}
+
+
+/* =========================
+   GROUND
+========================= */
+
+function drawGround(){
+
+    ctx.fillStyle="#9c783f";
+    ctx.fillRect(
+        0,
+        H*.48,
+        W,
+        H*.52
+    );
+}
+
+
+/* =========================
+   ROAD
+========================= */
+
+function drawRoad(){
+
+    const horizon=H*.48;
+
+    ctx.fillStyle="#303030";
+
+    ctx.beginPath();
+
+    ctx.moveTo(W*.48,horizon);
+    ctx.lineTo(W*.52,horizon);
+
+    ctx.lineTo(W*.96,H);
+    ctx.lineTo(W*.04,H);
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /* جوانب الطريق */
+
+    ctx.strokeStyle="#e6d29a";
+    ctx.lineWidth=5;
+
+    ctx.beginPath();
+    ctx.moveTo(W*.48,horizon);
+    ctx.lineTo(W*.04,H);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(W*.52,horizon);
+    ctx.lineTo(W*.96,H);
+    ctx.stroke();
+
+
+    /* خط الوسط */
+
+    ctx.strokeStyle="#f4e8a0";
+    ctx.lineWidth=4;
+    ctx.setLineDash([25,25]);
+
+    ctx.beginPath();
+
+    ctx.moveTo(W/2,horizon);
+    ctx.lineTo(W/2,H);
+
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+}
+
+
+/* =========================
+   RIVER
+========================= */
+
+function drawRiver(){
+
+    const horizon=H*.48;
+
+    ctx.fillStyle="#267eb0";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        W*.60,
+        horizon
+    );
+
+    ctx.lineTo(
+        W*.76,
+        horizon
+    );
+
+    ctx.lineTo(
+        W,
+        H
+    );
+
+    ctx.lineTo(
+        W*.58,
+        H
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.strokeStyle="rgba(255,255,255,.35)";
+    ctx.lineWidth=2;
+
+    for(let y=horizon+20;y<H;y+=35){
+
+        ctx.beginPath();
+        ctx.moveTo(W*.63,y);
+        ctx.lineTo(W*.92,y);
+        ctx.stroke();
+    }
+}
+
+
+/* =========================
+   BUILDINGS
+========================= */
+
+function drawBuilding(o,p){
+
+    const s=p.scale;
+
+    const width=o.w*s;
+    const height=o.h*s;
+
+    if(width<2) return;
+
+    /* ظل */
+
+    ctx.fillStyle="rgba(0,0,0,.25)";
+
+    ctx.fillRect(
+        p.x-width*.5+5,
+        p.y-height+8,
+        width,
+        height
+    );
+
+    /* جسم */
+
+    ctx.fillStyle=o.color;
+
+    ctx.fillRect(
+        p.x-width*.5,
+        p.y-height,
+        width,
+        height
+    );
+
+    /* السطح */
+
+    ctx.fillStyle="#765335";
+
+    ctx.fillRect(
+        p.x-width*.55,
+        p.y-height-5*s,
+        width*1.1,
+        6*s
+    );
+
+    /* شبابيك */
+
+    const rows=2;
+    const cols=3;
+
+    for(let r=0;r<rows;r++){
+
+        for(let c=0;c<cols;c++){
+
+            const wx=
+                p.x-width*.35+
+                c*width*.35;
+
+            const wy=
+                p.y-height*.75+
+                r*height*.32;
+
+            ctx.fillStyle="#304c59";
+
+            ctx.fillRect(
+                wx,
+                wy,
+                Math.max(2,width*.10),
+                Math.max(2,height*.12)
+            );
+        }
+    }
+}
+
+
+/* =========================
+   TREES
+========================= */
+
+function drawTree(o,p){
+
+    const s=p.scale;
+
+    if(s<.015) return;
+
+    /* جذع */
+
+    ctx.fillStyle="#70472a";
+
+    ctx.fillRect(
+        p.x-5*s,
+        p.y-35*s,
+        10*s,
+        35*s
+    );
+
+    /* تاج */
+
+    ctx.fillStyle="#26723a";
+
+    ctx.beginPath();
+    ctx.arc(
+        p.x,
+        p.y-48*s,
+        25*s,
+        0,
+        Math.PI*2
+    );
+    ctx.fill();
+
+    ctx.fillStyle="#35884a";
+
+    ctx.beginPath();
+    ctx.arc(
+        p.x-12*s,
+        p.y-58*s,
+        18*s,
+        0,
+        Math.PI*2
+    );
+    ctx.fill();
+}
+
+
+/* =========================
+   ROCK
+========================= */
+
+function drawRock(o,p){
+
+    const s=p.scale*o.s;
+
+    if(s<1) return;
+
+    ctx.fillStyle="#78664c";
+
+    ctx.beginPath();
+
+    ctx.moveTo(p.x-s,p.y);
+    ctx.lineTo(p.x-s*.5,p.y-s);
+    ctx.lineTo(p.x+s*.4,p.y-s*.8);
+    ctx.lineTo(p.x+s,p.y);
+    ctx.closePath();
+
+    ctx.fill();
+}
+
+
+/* =========================
+   HATRA RUINS
+========================= */
+
+function drawHatra(){
+
+    const p=worldToScreen(0,-1150);
+
+    if(!p) return;
+
+    const s=p.scale;
+
+    /* البوابة */
+
+    const w=150*s;
+    const h=130*s;
+
+    ctx.fillStyle="#b3834c";
+
+    ctx.fillRect(
+        p.x-w*.5,
+        p.y-h,
+        w,
+        h
+    );
+
+    /* القوس */
+
+    ctx.fillStyle="#27201a";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,
+        p.y-h*.55,
+        w*.27,
+        Math.PI,
+        0
+    );
+
+    ctx.fill();
+
+    ctx.fillRect(
+        p.x-w*.27,
+        p.y-h*.55,
+        w*.54,
+        h*.55
+    );
+
+    /* الأعمدة */
+
+    for(let i=-3;i<=3;i++){
+
+        const x=p.x+i*35*s;
+
+        ctx.fillStyle="#d09b58";
+
+        ctx.fillRect(
+            x-7*s,
+            p.y-h*.85,
+            14*s,
+            h*.8
+        );
+    }
+
+    /* اسم المكان */
+
+    if(s>.05){
+
+        ctx.fillStyle="white";
+        ctx.font=Math.max(14,30*s)+"px Arial";
+        ctx.textAlign="center";
+
+        ctx.fillText(
+            "🏛️ آثار الحضر",
+            p.x,
+            p.y-h-15*s
+        );
+    }
+}
+
+
+/* =========================
+   CAR
+========================= */
+
 function drawCar(){
 
-    // body
-    drawCube(
-        car.x,
-        car.y,
-        car.z,
-        2.4,
-        0.7,
-        4,
-        [0.75,0.03,0.03],
-        car.angle
+    const x=W/2;
+    const y=H*.72;
+
+    /* ظل */
+
+    ctx.fillStyle="rgba(0,0,0,.35)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x,
+        y+28,
+        42,
+        13,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* جسم السيارة */
+
+    ctx.fillStyle="#c71919";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        x-35,
+        y-40,
+        70,
+        80,
+        12
+    );
+
+    ctx.fill();
+
+
+    /* الزجاج */
+
+    ctx.fillStyle="#172c3a";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        x-25,
+        y-25,
+        50,
+        28,
+        7
+    );
+
+    ctx.fill();
+
+
+    /* الصدام */
+
+    ctx.fillStyle="#222";
+
+    ctx.fillRect(
+        x-30,
+        y+30,
+        60,
+        8
     );
 
 
-    // cabin
-    drawCube(
-        car.x,
-        car.y+1.1,
-        car.z-0.2,
-        1.8,
-        0.6,
-        2,
-        [0.05,0.15,0.22],
-        car.angle
+    /* الأضواء */
+
+    ctx.fillStyle="#fff3a0";
+
+    ctx.fillRect(
+        x-25,
+        y+25,
+        10,
+        7
     );
 
-
-    // front
-    drawCube(
-        car.x,
-        car.y+0.15,
-        car.z-3.9,
-        2.2,
-        0.25,
-        0.3,
-        [0.95,0.85,0.2],
-        car.angle
+    ctx.fillRect(
+        x+15,
+        y+25,
+        10,
+        7
     );
 }
 
 
-/* =========================================================
-   WORLD
-========================================================= */
+/* =========================
+   WORLD RENDER
+========================= */
 
-function createWorld(){
+function renderWorld(){
 
-    ground();
+    drawSky();
 
-    road();
+    drawGround();
 
-    river();
+    drawRiver();
 
-    bridge();
+    drawRoad();
 
-    mosul();
 
-    hatraDistrict();
+    /* العناصر حسب العمق */
 
-    hatraRuins();
+    const visible=[];
 
-    decorations();
+    for(const o of objects){
+
+        const p=worldToScreen(
+            o.x,
+            o.z
+        );
+
+        if(!p) continue;
+
+        if(
+            p.x<-200 ||
+            p.x>W+200 ||
+            p.y<-200 ||
+            p.y>H+200
+        ) continue;
+
+        visible.push({
+            o,
+            p
+        });
+    }
+
+
+    visible.sort(
+        (a,b)=>b.p.scale-a.p.scale
+    );
+
+
+    for(const item of visible){
+
+        if(item.o.type==="building")
+            drawBuilding(
+                item.o,
+                item.p
+            );
+
+        else if(item.o.type==="tree")
+            drawTree(
+                item.o,
+                item.p
+            );
+
+        else if(item.o.type==="rock")
+            drawRock(
+                item.o,
+                item.p
+            );
+    }
+
+
+    drawHatra();
+
+    drawCar();
 }
 
 
-createWorld();
-
-
-/* =========================================================
-   INPUT
-========================================================= */
+/* =========================
+   CONTROLS
+========================= */
 
 const keys={};
 
-window.addEventListener(
+addEventListener(
     "keydown",
     e=>{
         keys[e.key.toLowerCase()]=true;
     }
 );
 
-window.addEventListener(
+addEventListener(
     "keyup",
     e=>{
         keys[e.key.toLowerCase()]=false;
@@ -1319,211 +853,153 @@ window.addEventListener(
 );
 
 
-/* =========================================================
-   TOUCH BUTTON
-========================================================= */
-
-function touchButton(
-    id,
-    key
-){
+function button(id,key){
 
     const el=
         document.getElementById(id);
 
+    function down(e){
+        e.preventDefault();
+        keys[key]=true;
+    }
+
+    function up(e){
+        e.preventDefault();
+        keys[key]=false;
+    }
+
     el.addEventListener(
         "touchstart",
-        e=>{
-            e.preventDefault();
-            keys[key]=true;
-        },
+        down,
         {passive:false}
     );
 
     el.addEventListener(
         "touchend",
-        e=>{
-            e.preventDefault();
-            keys[key]=false;
-        },
+        up,
         {passive:false}
     );
 
     el.addEventListener(
         "touchcancel",
-        e=>{
-            e.preventDefault();
-            keys[key]=false;
-        },
+        up,
         {passive:false}
     );
 
-
     el.addEventListener(
         "mousedown",
-        ()=>{
-            keys[key]=true;
-        }
+        down
     );
 
     el.addEventListener(
         "mouseup",
-        ()=>{
-            keys[key]=false;
-        }
+        up
     );
 
     el.addEventListener(
         "mouseleave",
-        ()=>{
-            keys[key]=false;
-        }
+        up
     );
 }
 
-
-touchButton("up","arrowup");
-touchButton("down","arrowdown");
-touchButton("left","arrowleft");
-touchButton("right","arrowright");
-
-
-/* =========================================================
-   CAR MOVEMENT
-========================================================= */
-
-function updateCar(){
-
-    const acceleration=0.018;
-    const maxSpeed=1.7;
-    const reverseSpeed=-0.8;
+button("up","arrowup");
+button("down","arrowdown");
+button("left","arrowleft");
+button("right","arrowright");
 
 
-    if(
+/* =========================
+   CAR PHYSICS
+========================= */
+
+function update(){
+
+    const accelerating=
         keys["arrowup"] ||
-        keys["w"]
-    ){
+        keys["w"];
 
-        car.speed+=acceleration;
-    }
-
-
-    if(
+    const braking=
         keys["arrowdown"] ||
-        keys["s"]
-    ){
+        keys["s"];
 
-        car.speed-=acceleration;
-    }
-
-
-    if(
-        !keys["arrowup"] &&
-        !keys["w"] &&
-        !keys["arrowdown"] &&
-        !keys["s"]
-    ){
-
-        car.speed*=0.94;
-    }
-
-
-    if(car.speed>maxSpeed)
-        car.speed=maxSpeed;
-
-    if(car.speed<reverseSpeed)
-        car.speed=reverseSpeed;
-
-
-    if(
+    const left=
         keys["arrowleft"] ||
-        keys["a"]
-    ){
+        keys["a"];
 
-        car.angle+=0.035*
-            Math.max(
-                Math.abs(car.speed),
-                0.25
-            );
-    }
+    const right=
+        keys["arrowright"] ||
+        keys["d"];
+
+
+    if(accelerating)
+        car.speed+=.012;
+
+    if(braking)
+        car.speed-=.018;
 
 
     if(
-        keys["arrowright"] ||
-        keys["d"]
+        !accelerating &&
+        !braking
     ){
+        car.speed*=.96;
+    }
 
-        car.angle-=0.035*
+
+    car.speed=
+        Math.max(
+            -.7,
+            Math.min(
+                2.2,
+                car.speed
+            )
+        );
+
+
+    if(left){
+
+        car.angle+=
+            .025*
             Math.max(
                 Math.abs(car.speed),
-                0.25
+                .25
             );
     }
 
 
-    car.x +=
-        Math.sin(car.angle) *
-        car.speed;
+    if(right){
 
-    car.z +=
-        -Math.cos(car.angle) *
-        car.speed;
-
-
-    // حدود الخريطة
-    if(car.x>120)
-        car.x=120;
-
-    if(car.x<-120)
-        car.x=-120;
-
-    if(car.z>200)
-        car.z=200;
-
-    if(car.z<-850)
-        car.z=-850;
-}
-
-
-/* =========================================================
-   LOCATION TEXT
-========================================================= */
-
-function updateLocation(){
-
-    const z=car.z;
-
-    let text="";
-
-    if(z>145){
-
-        text="🏙️ مدينة الموصل";
-
-    }else if(z>20){
-
-        text="🏙️ الموصل - الطريق إلى الجسر";
-
-    }else if(z>-430){
-
-        text="🌊 نهر دجلة - جسر الموصل";
-
-    }else if(z>-610){
-
-        text="🛣️ الطريق باتجاه الحضر";
-
-    }else if(z>-700){
-
-        text="🏘️ مركز قضاء الحضر";
-
-    }else{
-
-        text="🏛️ آثار الحضر";
+        car.angle-=
+            .025*
+            Math.max(
+                Math.abs(car.speed),
+                .25
+            );
     }
 
 
-    document.getElementById(
-        "location"
-    ).innerText=text;
+    car.x+=
+        Math.sin(car.angle)*
+        car.speed;
+
+    car.z-=
+        Math.cos(car.angle)*
+        car.speed;
+
+
+    /* حدود العالم */
+
+    if(car.x>180)
+        car.x=180;
+
+    if(car.x<-180)
+        car.x=-180;
+
+    if(car.z>50)
+        car.z=50;
+
+    if(car.z<-1300)
+        car.z=-1300;
 
 
     const speed=
@@ -1531,162 +1007,47 @@ function updateLocation(){
             Math.abs(car.speed)*60
         );
 
-
     document.getElementById(
         "speed"
     ).innerText=
         "🚗 السرعة: "+speed;
+
+
+    let location="🏙️ مدينة الموصل";
+
+    if(car.z>-400)
+        location="🏙️ مدينة الموصل";
+
+    else if(car.z>-850)
+        location="🛣️ طريق الموصل → الحضر";
+
+    else if(car.z>-1050)
+        location="🏘️ قضاء الحضر";
+
+    else
+        location="🏛️ آثار الحضر";
+
+
+    document.getElementById(
+        "location"
+    ).innerText=location;
 }
 
 
-/* =========================================================
-   RESIZE
-========================================================= */
+/* =========================
+   GAME LOOP
+========================= */
 
-function resize(){
+function loop(){
 
-    const dpr=
-        Math.min(
-            window.devicePixelRatio || 1,
-            1.5
-        );
+    update();
 
-    canvas.width=
-        window.innerWidth*dpr;
+    renderWorld();
 
-    canvas.height=
-        window.innerHeight*dpr;
-
-    gl.viewport(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+    requestAnimationFrame(loop);
 }
 
-
-window.addEventListener(
-    "resize",
-    resize
-);
-
-resize();
-
-
-/* =========================================================
-   RENDER
-========================================================= */
-
-function render(){
-
-    updateCar();
-
-    updateLocation();
-
-
-    gl.enable(
-        gl.DEPTH_TEST
-    );
-
-    gl.clearColor(
-        0.45,
-        0.70,
-        0.90,
-        1
-    );
-
-
-    gl.clear(
-        gl.COLOR_BUFFER_BIT |
-        gl.DEPTH_BUFFER_BIT
-    );
-
-
-    const aspect=
-        canvas.width/
-        canvas.height;
-
-
-    const projection=
-        perspective(
-            Math.PI/3,
-            aspect,
-            0.1,
-            1500
-        );
-
-
-    // كاميرا خلف السيارة
-    const distance=15;
-
-    const cameraX=
-        car.x -
-        Math.sin(car.angle)*
-        distance;
-
-    const cameraY=9;
-
-    const cameraZ=
-        car.z +
-        Math.cos(car.angle)*
-        distance;
-
-
-    const targetX=
-        car.x +
-        Math.sin(car.angle)*5;
-
-    const targetY=2;
-
-    const targetZ=
-        car.z -
-        Math.cos(car.angle)*5;
-
-
-    const view=
-        cameraMatrix(
-            [
-                cameraX,
-                cameraY,
-                cameraZ
-            ],
-            [
-                targetX,
-                targetY,
-                targetZ
-            ]
-        );
-
-
-    gl.uniformMatrix4fv(
-        uProjection,
-        false,
-        new Float32Array(
-            projection
-        )
-    );
-
-
-    gl.uniformMatrix4fv(
-        uView,
-        false,
-        new Float32Array(
-            view
-        )
-    );
-
-
-    drawCar();
-
-
-    requestAnimationFrame(
-        render
-    );
-}
-
-
-render();
+loop();
 
 </script>
 
