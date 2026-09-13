@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الموصل - الحضر | Open World</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #111;
+      font-family: Arial, sans-serif;
+    }
+
+    #game {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #hud {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 10;
+      color: white;
+      background: rgba(0,0,0,.55);
+      padding: 12px 16px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+    }
+
+    #title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #location {
+      margin-top: 5px;
+      font-size: 14px;
+      opacity: .85;
+    }
+
+    #info {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      z-index: 10;
+      text-align: center;
+      color: white;
+      background: rgba(0,0,0,.45);
+      padding: 10px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div id="title">🇮🇶 الموصل - الحضر</div>
+  <div id="location">العالم المفتوح</div>
+</div>
+
+<div id="info">
+  نموذج أولي للعبة العالم المفتوح
+</div>
+
+<script type="module">
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+let player = {
+  x: 0,
+  y: 0
+};
+
+let roadOffset = 0;
+
+function draw() {
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // السماء
+  const sky = ctx.createLinearGradient(0, 0, 0, h);
+  sky.addColorStop(0, "#6fa8dc");
+  sky.addColorStop(0.55, "#b7d7ed");
+  sky.addColorStop(1, "#d8c59a");
+
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h);
+
+  // الأرض
+  ctx.fillStyle = "#c2a66b";
+  ctx.fillRect(0, h * .55, w, h * .45);
+
+  // طريق الموصل - الحضر
+  ctx.fillStyle = "#383838";
+  ctx.beginPath();
+
+  ctx.moveTo(w * .38, h);
+  ctx.lineTo(w * .47, h * .55);
+  ctx.lineTo(w * .53, h * .55);
+  ctx.lineTo(w * .62, h);
+
+  ctx.closePath();
+  ctx.fill();
+
+  // خط الطريق
+  ctx.strokeStyle = "#f4d35e";
+  ctx.lineWidth = 5;
+  ctx.setLineDash([30, 25]);
+
+  ctx.beginPath();
+  ctx.moveTo(w * .50, h);
+  ctx.lineTo(w * .50, h * .55);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+
+  // جبال بعيدة
+  ctx.fillStyle = "#77705d";
+  ctx.beginPath();
+  ctx.moveTo(0, h * .55);
+  ctx.lineTo(w * .15, h * .40);
+  ctx.lineTo(w * .28, h * .55);
+  ctx.lineTo(w * .42, h * .38);
+  ctx.lineTo(w * .58, h * .55);
+  ctx.lineTo(w * .75, h * .42);
+  ctx.lineTo(w, h * .55);
+  ctx.closePath();
+  ctx.fill();
+
+  // سيارة اللاعب
+  ctx.fillStyle = "#b21f1f";
+  ctx.fillRect(w * .46, h * .76, w * .08, h * .13);
+
+  ctx.fillStyle = "#222";
+  ctx.fillRect(w * .475, h * .735, w * .05, h * .055);
+
+  ctx.fillStyle = "#111";
+  ctx.beginPath();
+  ctx.arc(w * .475, h * .89, 12, 0, Math.PI * 2);
+  ctx.arc(w * .525, h * .89, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+</script>
+
+</body>
+</html>
