@@ -1,75 +1,137 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>الموصل - الحضر | Open World</title><style>
+<title>الموصل - الحضر | Open World</title>
+
+<style>
 html,body{
     margin:0;width:100%;height:100%;overflow:hidden;
-    background:#87b9df;font-family:Arial,sans-serif;
+    background:#87b9df;
+    font-family:Arial,sans-serif;
     touch-action:none;
 }
 #game{width:100%;height:100%;display:block}
+
 #hud{
-    position:fixed;top:12px;right:12px;z-index:10;
-    color:white;background:rgba(0,0,0,.62);
-    padding:12px 16px;border-radius:16px;
+    position:fixed;
+    top:12px;
+    right:12px;
+    z-index:10;
+    color:white;
+    background:rgba(0,0,0,.62);
+    padding:12px 16px;
+    border-radius:16px;
     backdrop-filter:blur(5px);
 }
 #title{font-size:20px;font-weight:bold}
 #location{margin-top:6px;font-size:13px}
 #mission{margin-top:5px;color:#ffd84d;font-size:13px}
+
 #info{
-    position:fixed;bottom:15px;right:15px;z-index:10;
-    color:white;background:rgba(0,0,0,.5);
-    padding:9px 13px;border-radius:12px;font-size:12px;
+    position:fixed;
+    bottom:15px;
+    right:15px;
+    z-index:10;
+    color:white;
+    background:rgba(0,0,0,.5);
+    padding:9px 13px;
+    border-radius:12px;
+    font-size:12px;
 }
+
 #speed{
-    position:fixed;bottom:15px;left:205px;z-index:10;
-    color:white;background:rgba(0,0,0,.55);
-    padding:8px 12px;border-radius:12px;font-size:12px;
+    position:fixed;
+    bottom:15px;
+    left:205px;
+    z-index:10;
+    color:white;
+    background:rgba(0,0,0,.55);
+    padding:8px 12px;
+    border-radius:12px;
+    font-size:12px;
 }
+
 #controls{
-    position:fixed;bottom:20px;left:20px;z-index:20;
-    display:grid;grid-template-columns:58px 58px 58px;
-    grid-template-rows:58px 58px 58px;gap:6px;direction:ltr;
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    z-index:20;
+    display:grid;
+    grid-template-columns:58px 58px 58px;
+    grid-template-rows:58px 58px 58px;
+    gap:6px;
+    direction:ltr;
 }
+
 button{
-    width:58px;height:58px;border:1px solid rgba(255,255,255,.25);
-    border-radius:50%;background:rgba(0,0,0,.62);
-    color:white;font-size:23px;font-weight:bold;
-    touch-action:none;user-select:none;
+    width:58px;
+    height:58px;
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:50%;
+    background:rgba(0,0,0,.62);
+    color:white;
+    font-size:23px;
+    font-weight:bold;
+    touch-action:none;
+    user-select:none;
 }
-button:active{background:rgba(180,30,30,.85);transform:scale(.94)}
+
+button:active{
+    background:rgba(180,30,30,.85);
+    transform:scale(.94);
+}
+
 #up{grid-column:2;grid-row:1}
 #left{grid-column:1;grid-row:2}
 #down{grid-column:2;grid-row:3}
 #right{grid-column:3;grid-row:2}
-</style></head><body><div id="hud">
+</style>
+</head>
+
+<body>
+
+<div id="hud">
     <div id="title">🇮🇶 الموصل - الحضر</div>
     <div id="location">🏙️ مدينة الموصل</div>
-    <div id="mission">المهمة: اعبر جسر الموصل وتوجه جنوباً باتجاه الحضر</div>
-</div><div id="info">🚗 تحرك بالأسهم أو أزرار التحكم</div>
-<div id="speed">السرعة: 0</div><div id="controls">
+    <div id="mission">
+        المهمة: اعبر جسر الموصل وتوجه إلى مركز قضاء الحضر
+    </div>
+</div>
+
+<div id="info">🚗 تحرك بالأسهم أو أزرار التحكم</div>
+<div id="speed">السرعة: 0</div>
+
+<div id="controls">
     <button id="up">▲</button>
     <button id="left">◀</button>
     <button id="down">▼</button>
     <button id="right">▶</button>
-</div><canvas id="game"></canvas>
+</div>
+
+<canvas id="game"></canvas>
 
 <script type="module">
 
 import * as THREE from
 "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 
-/* =========================
+/* =====================================================
    المشهد
-========================= */
+===================================================== */
 
 const canvas=document.getElementById("game");
 
 const scene=new THREE.Scene();
+
 scene.background=new THREE.Color(0x87b9df);
-scene.fog=new THREE.Fog(0x87b9df,180,1100);
+
+scene.fog=new THREE.Fog(
+    0x87b9df,
+    180,
+    1100
+);
 
 const camera=new THREE.PerspectiveCamera(
     65,
@@ -96,17 +158,24 @@ renderer.setPixelRatio(
 
 renderer.shadowMap.enabled=true;
 
-/* =========================
+
+/* =====================================================
    الإضاءة
-========================= */
+===================================================== */
 
 const sun=new THREE.DirectionalLight(
     0xfff0cc,
     2.3
 );
 
-sun.position.set(300,500,200);
+sun.position.set(
+    300,
+    500,
+    200
+);
+
 sun.castShadow=true;
+
 scene.add(sun);
 
 scene.add(
@@ -116,12 +185,16 @@ scene.add(
     )
 );
 
-/* =========================
+
+/* =====================================================
    الأرض
-========================= */
+===================================================== */
 
 const ground=new THREE.Mesh(
-    new THREE.PlaneGeometry(1800,1800),
+    new THREE.PlaneGeometry(
+        1800,
+        1800
+    ),
     new THREE.MeshStandardMaterial({
         color:0xb69a63,
         roughness:1
@@ -129,19 +202,23 @@ const ground=new THREE.Mesh(
 );
 
 ground.rotation.x=-Math.PI/2;
+
 ground.receiveShadow=true;
+
 scene.add(ground);
 
-/* =========================
+
+/* =====================================================
    نهر دجلة
-========================= */
+===================================================== */
 
 const riverZ=80;
 
-/* الماء */
-
 const river=new THREE.Mesh(
-    new THREE.PlaneGeometry(900,95),
+    new THREE.PlaneGeometry(
+        900,
+        95
+    ),
     new THREE.MeshStandardMaterial({
         color:0x236f91,
         roughness:.25,
@@ -150,13 +227,20 @@ const river=new THREE.Mesh(
 );
 
 river.rotation.x=-Math.PI/2;
-river.position.set(0,.08,riverZ);
+
+river.position.set(
+    0,
+    .08,
+    riverZ
+);
+
 scene.add(river);
 
-/* طبقة ماء ثانية لإعطاء عمق بصري */
-
 const riverGlow=new THREE.Mesh(
-    new THREE.PlaneGeometry(890,82),
+    new THREE.PlaneGeometry(
+        890,
+        82
+    ),
     new THREE.MeshStandardMaterial({
         color:0x3188a6,
         transparent:true,
@@ -166,12 +250,19 @@ const riverGlow=new THREE.Mesh(
 );
 
 riverGlow.rotation.x=-Math.PI/2;
-riverGlow.position.set(0,.1,riverZ);
+
+riverGlow.position.set(
+    0,
+    .1,
+    riverZ
+);
+
 scene.add(riverGlow);
 
-/* =========================
+
+/* =====================================================
    ضفاف النهر
-========================= */
+===================================================== */
 
 const bankMaterial=
     new THREE.MeshStandardMaterial({
@@ -180,24 +271,32 @@ const bankMaterial=
     });
 
 const northBank=new THREE.Mesh(
-    new THREE.BoxGeometry(900,1,18),
+    new THREE.BoxGeometry(
+        900,
+        1,
+        18
+    ),
     bankMaterial
 );
 
-northBank.position.set(0,.45,riverZ-56);
+northBank.position.set(
+    0,
+    .45,
+    riverZ-56
+);
+
 scene.add(northBank);
 
-const southBank=new THREE.Mesh(
-    new THREE.BoxGeometry(900,1,18),
-    bankMaterial
-);
+const southBank=northBank.clone();
 
-southBank.position.set(0,.45,riverZ+56);
+southBank.position.z=riverZ+56;
+
 scene.add(southBank);
 
-/* =========================
+
+/* =====================================================
    جسر الموصل
-========================= */
+===================================================== */
 
 function createMosulBridge(){
 
@@ -215,8 +314,6 @@ function createMosulBridge(){
             roughness:.9
         });
 
-    /* سطح الجسر */
-
     const deck=new THREE.Mesh(
         new THREE.BoxGeometry(
             36,
@@ -227,40 +324,61 @@ function createMosulBridge(){
     );
 
     deck.position.y=1.2;
+
     bridge.add(deck);
 
-    /* الأرصفة */
-
     const sidewalk1=new THREE.Mesh(
-        new THREE.BoxGeometry(5,1.8,125),
+        new THREE.BoxGeometry(
+            5,
+            1.8,
+            125
+        ),
         concreteMat
     );
 
-    sidewalk1.position.set(-20,1.4,0);
+    sidewalk1.position.set(
+        -20,
+        1.4,
+        0
+    );
+
     bridge.add(sidewalk1);
 
     const sidewalk2=sidewalk1.clone();
+
     sidewalk2.position.x=20;
+
     bridge.add(sidewalk2);
 
-    /* دعامات الجسر */
-
-    for(let z=-45;z<=45;z+=30){
+    for(
+        let z=-45;
+        z<=45;
+        z+=30
+    ){
 
         const pillar1=new THREE.Mesh(
-            new THREE.BoxGeometry(4,8,5),
+            new THREE.BoxGeometry(
+                4,
+                8,
+                5
+            ),
             concreteMat
         );
 
-        pillar1.position.set(-12,-2,z);
+        pillar1.position.set(
+            -12,
+            -2,
+            z
+        );
+
         bridge.add(pillar1);
 
         const pillar2=pillar1.clone();
+
         pillar2.position.x=12;
+
         bridge.add(pillar2);
     }
-
-    /* حواجز */
 
     for(const x of [-17,17]){
 
@@ -273,25 +391,44 @@ function createMosulBridge(){
             concreteMat
         );
 
-        rail.position.set(x,3,0);
+        rail.position.set(
+            x,
+            3,
+            0
+        );
+
         bridge.add(rail);
     }
 
-    bridge.position.set(0,0,riverZ);
+    bridge.position.set(
+        0,
+        0,
+        riverZ
+    );
 
     scene.add(bridge);
 }
 
 createMosulBridge();
 
-/* =========================
-   الطرق
-========================= */
 
-function createRoad(x,z,width,length,rotation=0){
+/* =====================================================
+   الطرق
+===================================================== */
+
+function createRoad(
+    x,
+    z,
+    width,
+    length,
+    rotation=0
+){
 
     const road=new THREE.Mesh(
-        new THREE.PlaneGeometry(width,length),
+        new THREE.PlaneGeometry(
+            width,
+            length
+        ),
         new THREE.MeshStandardMaterial({
             color:0x292929,
             roughness:.95
@@ -299,18 +436,32 @@ function createRoad(x,z,width,length,rotation=0){
     );
 
     road.rotation.x=-Math.PI/2;
+
     road.rotation.z=rotation;
-    road.position.set(x,.03,z);
+
+    road.position.set(
+        x,
+        .03,
+        z
+    );
+
     scene.add(road);
 
     return road;
 }
 
+
 /* الطريق الرئيسي */
 
-createRoad(0,0,32,1700);
+createRoad(
+    0,
+    0,
+    32,
+    1700
+);
 
-/* طريق جانبي */
+
+/* طريق الموصل الجانبي */
 
 createRoad(
     -130,
@@ -320,57 +471,174 @@ createRoad(
     Math.PI/2
 );
 
-/* =========================
+
+/* =====================================================
+   مركز قضاء الحضر - الطرق
+===================================================== */
+
+/*
+   منطقة مركز القضاء:
+   تقريباً بين Z -430 و -620
+*/
+
+const hatraCenterZ=-520;
+
+
+/* الشارع الرئيسي داخل المركز */
+
+createRoad(
+    0,
+    hatraCenterZ,
+    42,
+    250
+);
+
+
+/* الشارع الشرقي */
+
+createRoad(
+    100,
+    hatraCenterZ,
+    18,
+    250
+);
+
+
+/* الشارع الغربي */
+
+createRoad(
+    -100,
+    hatraCenterZ,
+    18,
+    250
+);
+
+
+/* شارع عرضي شمال */
+
+createRoad(
+    0,
+    -460,
+    18,
+    300,
+    Math.PI/2
+);
+
+
+/* شارع عرضي جنوب */
+
+createRoad(
+    0,
+    -580,
+    18,
+    300,
+    Math.PI/2
+);
+
+
+/* =====================================================
    خطوط الطريق
-========================= */
+===================================================== */
 
 const lineMaterial=
     new THREE.MeshStandardMaterial({
         color:0xffd447
     });
 
-for(let z=-820;z<850;z+=28){
+for(
+    let z=-820;
+    z<850;
+    z+=28
+){
 
-    /* لا نضع الخط فوق الجسر بشكل منفصل */
+    if(
+        z>15 &&
+        z<145
+    ) continue;
 
-    if(z>15 && z<145) continue;
+    /*
+       لا نضع خط وسط فوق مركز القضاء
+       لأن داخله شوارع متعددة
+    */
+
+    if(
+        z<-430 &&
+        z>-620
+    ) continue;
 
     const line=new THREE.Mesh(
-        new THREE.BoxGeometry(1,.06,12),
+        new THREE.BoxGeometry(
+            1,
+            .06,
+            12
+        ),
         lineMaterial
     );
 
-    line.position.set(0,.09,z);
+    line.position.set(
+        0,
+        .09,
+        z
+    );
+
     scene.add(line);
 }
+
 
 /* خط الجسر */
 
 const bridgeLine=new THREE.Mesh(
-    new THREE.BoxGeometry(1,.08,110),
+    new THREE.BoxGeometry(
+        1,
+        .08,
+        110
+    ),
     lineMaterial
 );
 
-bridgeLine.position.set(0,2,riverZ);
+bridgeLine.position.set(
+    0,
+    2,
+    riverZ
+);
+
 scene.add(bridgeLine);
 
-/* =========================
-   مباني الموصل
-========================= */
 
-function createBuilding(x,z,w,h,d){
+/* =====================================================
+   المباني
+===================================================== */
+
+function createBuilding(
+    x,
+    z,
+    w,
+    h,
+    d,
+    color=0xb99062
+){
 
     const building=new THREE.Mesh(
-        new THREE.BoxGeometry(w,h,d),
+        new THREE.BoxGeometry(
+            w,
+            h,
+            d
+        ),
         new THREE.MeshStandardMaterial({
-            color:0xb99062,
+            color,
             roughness:1
         })
     );
 
-    building.position.set(x,h/2,z);
+    building.position.set(
+        x,
+        h/2,
+        z
+    );
+
     building.castShadow=true;
     building.receiveShadow=true;
+
     scene.add(building);
 
     const roof=new THREE.Mesh(
@@ -384,36 +652,72 @@ function createBuilding(x,z,w,h,d){
         })
     );
 
-    roof.position.set(x,h+.1,z);
+    roof.position.set(
+        x,
+        h+.1,
+        z
+    );
+
     scene.add(roof);
 }
 
-/* مباني شمال النهر */
 
-for(let x=-210;x<=210;x+=42){
+/* =====================================================
+   مباني الموصل
+===================================================== */
 
-    for(let z=160;z<430;z+=42){
+for(
+    let x=-210;
+    x<=210;
+    x+=42
+){
 
-        if(Math.abs(x)<28) continue;
+    for(
+        let z=160;
+        z<430;
+        z+=42
+    ){
 
-        const h=8+Math.random()*18;
+        if(
+            Math.abs(x)<28
+        ) continue;
+
+        const h=
+            8+
+            Math.random()*18;
 
         createBuilding(
-            x,z,25,h,28
+            x,
+            z,
+            25,
+            h,
+            28
         );
     }
 }
 
-/* مباني جنوب النهر */
 
-for(let x=-210;x<=210;x+=50){
+/* مباني جنوب الموصل */
 
-    for(let z=-20;z<55;z+=38){
+for(
+    let x=-210;
+    x<=210;
+    x+=50
+){
 
-        if(Math.abs(x)<35) continue;
+    for(
+        let z=-20;
+        z<55;
+        z+=38
+    ){
+
+        if(
+            Math.abs(x)<35
+        ) continue;
 
         createBuilding(
-            x,z,
+            x,
+            z,
             27,
             7+Math.random()*12,
             25
@@ -421,108 +725,445 @@ for(let x=-210;x<=210;x+=50){
     }
 }
 
-/* =========================
-   الأشجار
-========================= */
 
-function createTree(x,z){
+/* =====================================================
+   مركز قضاء الحضر - الأحياء
+===================================================== */
+
+/* حي شرقي */
+
+for(
+    let x=55;
+    x<=210;
+    x+=48
+){
+
+    for(
+        let z=-455;
+        z>=-585;
+        z-=42
+    ){
+
+        createBuilding(
+            x,
+            z,
+            28,
+            5+Math.random()*7,
+            25,
+            0xc19b6d
+        );
+    }
+}
+
+
+/* حي غربي */
+
+for(
+    let x=-55;
+    x>=-210;
+    x-=48
+){
+
+    for(
+        let z=-455;
+        z>=-585;
+        z-=42
+    ){
+
+        createBuilding(
+            x,
+            z,
+            28,
+            5+Math.random()*7,
+            25,
+            0xc19b6d
+        );
+    }
+);
+
+
+/* =====================================================
+   مباني مركز القضاء المهمة
+===================================================== */
+
+function createLargeBuilding(
+    x,
+    z,
+    w,
+    h,
+    d,
+    color
+){
+
+    createBuilding(
+        x,
+        z,
+        w,
+        h,
+        d,
+        color
+    );
+}
+
+
+/* مبنى الإدارة */
+
+createLargeBuilding(
+    -65,
+    -500,
+    42,
+    12,
+    32,
+    0xd0ae7a
+);
+
+
+/* مركز الشرطة */
+
+createLargeBuilding(
+    65,
+    -500,
+    38,
+    10,
+    30,
+    0xb8b8ad
+);
+
+
+/* سوق */
+
+createLargeBuilding(
+    -65,
+    -555,
+    55,
+    7,
+    30,
+    0xb88a55
+);
+
+
+/* مبنى خدمي */
+
+createLargeBuilding(
+    65,
+    -555,
+    45,
+    8,
+    30,
+    0xc5a477
+);
+
+
+/* =====================================================
+   ساحة مركز قضاء الحضر
+===================================================== */
+
+const square=new THREE.Mesh(
+    new THREE.PlaneGeometry(
+        90,
+        70
+    ),
+    new THREE.MeshStandardMaterial({
+        color:0x8f7957,
+        roughness:1
+    })
+);
+
+square.rotation.x=-Math.PI/2;
+
+square.position.set(
+    0,
+    .045,
+    -520
+);
+
+scene.add(square);
+
+
+/* دائرة وسط الساحة */
+
+const plazaCircle=new THREE.Mesh(
+    new THREE.CylinderGeometry(
+        13,
+        13,
+        .25,
+        32
+    ),
+    new THREE.MeshStandardMaterial({
+        color:0x6e5940
+    })
+);
+
+plazaCircle.position.set(
+    0,
+    .17,
+    -520
+);
+
+scene.add(plazaCircle);
+
+
+/* نصب بسيط */
+
+const monument=new THREE.Mesh(
+    new THREE.BoxGeometry(
+        3,
+        8,
+        3
+    ),
+    new THREE.MeshStandardMaterial({
+        color:0xb58a55
+    })
+);
+
+monument.position.set(
+    0,
+    4.2,
+    -520
+);
+
+scene.add(monument);
+
+
+/* =====================================================
+   المحلات
+===================================================== */
+
+function createShop(
+    x,
+    z,
+    color
+){
+
+    createBuilding(
+        x,
+        z,
+        18,
+        5,
+        12,
+        color
+    );
+}
+
+
+/* محلات شرق */
+
+for(
+    let i=0;
+    i<6;
+    i++
+){
+
+    createShop(
+        125,
+        -465+i*25,
+        0xc28c51
+    );
+}
+
+
+/* محلات غرب */
+
+for(
+    let i=0;
+    i<6;
+    i++
+){
+
+    createShop(
+        -125,
+        -465+i*25,
+        0xc28c51
+    );
+}
+
+
+/* =====================================================
+   الأشجار
+===================================================== */
+
+function createTree(
+    x,
+    z
+){
 
     const trunk=new THREE.Mesh(
         new THREE.CylinderGeometry(
-            .55,.75,5,10
+            .55,
+            .75,
+            5,
+            10
         ),
         new THREE.MeshStandardMaterial({
             color:0x624329
         })
     );
 
-    trunk.position.set(x,2.5,z);
+    trunk.position.set(
+        x,
+        2.5,
+        z
+    );
+
     trunk.castShadow=true;
+
     scene.add(trunk);
 
     const leaves=new THREE.Mesh(
         new THREE.SphereGeometry(
-            3.5,10,10
+            3.5,
+            10,
+            10
         ),
         new THREE.MeshStandardMaterial({
             color:0x3c6930
         })
     );
 
-    leaves.position.set(x,7,z);
+    leaves.position.set(
+        x,
+        7,
+        z
+    );
+
     leaves.castShadow=true;
+
     scene.add(leaves);
 }
 
+
 /* أشجار الموصل */
 
-for(let i=0;i<130;i++){
+for(
+    let i=0;
+    i<130;
+    i++
+){
 
     const x=
         (Math.random()<.5?-1:1)*
         (45+Math.random()*240);
 
-    let z=
-        160+Math.random()*300;
+    const z=
+        160+
+        Math.random()*300;
 
-    createTree(x,z);
+    createTree(
+        x,
+        z
+    );
 }
+
 
 /* أشجار ضفاف دجلة */
 
-for(let i=0;i<55;i++){
+for(
+    let i=0;
+    i<55;
+    i++
+){
 
     const x=
-        -430+Math.random()*860;
+        -430+
+        Math.random()*860;
 
     const side=
         Math.random()<.5?-1:1;
 
     const z=
         riverZ+
-        side*(65+Math.random()*25);
+        side*
+        (65+Math.random()*25);
 
-    createTree(x,z);
+    createTree(
+        x,
+        z
+    );
 }
 
-/* =========================
-   شجيرات الصحراء
-========================= */
 
-for(let i=0;i<150;i++){
+/* أشجار مركز القضاء */
+
+for(
+    let i=0;
+    i<35;
+    i++
+){
+
+    const side=
+        Math.random()<.5?-1:1;
+
+    const x=
+        side*
+        (220+Math.random()*60);
+
+    const z=
+        -440-
+        Math.random()*170;
+
+    createTree(
+        x,
+        z
+    );
+}
+
+
+/* =====================================================
+   شجيرات الصحراء
+===================================================== */
+
+for(
+    let i=0;
+    i<150;
+    i++
+){
 
     const x=
         (Math.random()<.5?-1:1)*
         (45+Math.random()*280);
 
     const z=
-        -750+Math.random()*700;
+        -750+
+        Math.random()*700;
 
     const bush=new THREE.Mesh(
         new THREE.SphereGeometry(
             .8+Math.random()*1.4,
-            7,7
+            7,
+            7
         ),
         new THREE.MeshStandardMaterial({
             color:0x6f6535
         })
     );
 
-    bush.position.set(x,.7,z);
+    bush.position.set(
+        x,
+        .7,
+        z
+    );
+
     scene.add(bush);
 }
 
-/* =========================
-   الإشارات
-========================= */
 
-function createSign(text,x,z){
+/* =====================================================
+   الإشارات
+===================================================== */
+
+function createSign(
+    text,
+    x,
+    z
+){
 
     const group=new THREE.Group();
 
     const pole=new THREE.Mesh(
         new THREE.CylinderGeometry(
-            .12,.12,5
+            .12,
+            .12,
+            5
         ),
         new THREE.MeshStandardMaterial({
             color:0x555555
@@ -530,11 +1171,14 @@ function createSign(text,x,z){
     );
 
     pole.position.y=2.5;
+
     group.add(pole);
 
     const board=new THREE.Mesh(
         new THREE.BoxGeometry(
-            8,2.2,.25
+            8,
+            2.2,
+            .25
         ),
         new THREE.MeshStandardMaterial({
             color:0x174f38
@@ -542,74 +1186,234 @@ function createSign(text,x,z){
     );
 
     board.position.y=4.4;
+
     group.add(board);
 
-    group.position.set(x,0,z);
+    group.position.set(
+        x,
+        0,
+        z
+    );
+
     scene.add(group);
 }
 
-createSign("الموصل",24,400);
-createSign("جسر الموصل",24,160);
-createSign("الحضر",24,-300);
-createSign("آثار الحضر",-24,-650);
 
-/* =========================
-   بوابة الحضر
-========================= */
+/* لوحات */
+
+createSign(
+    "الموصل",
+    24,
+    400
+);
+
+createSign(
+    "جسر الموصل",
+    24,
+    160
+);
+
+createSign(
+    "الحضر",
+    24,
+    -300
+);
+
+createSign(
+    "مركز قضاء الحضر",
+    35,
+    -430
+);
+
+createSign(
+    "مركز القضاء",
+    35,
+    -520
+);
+
+createSign(
+    "آثار الحضر",
+    -24,
+    -650
+);
+
+
+/* =====================================================
+   بوابة مركز قضاء الحضر
+===================================================== */
+
+function createDistrictGate(){
+
+    const group=new THREE.Group();
+
+    const stone=
+        new THREE.MeshStandardMaterial({
+            color:0xb58a55,
+            roughness:1
+        });
+
+    const left=new THREE.Mesh(
+        new THREE.BoxGeometry(
+            4,
+            12,
+            4
+        ),
+        stone
+    );
+
+    left.position.set(
+        -18,
+        6,
+        0
+    );
+
+    group.add(left);
+
+    const right=left.clone();
+
+    right.position.x=18;
+
+    group.add(right);
+
+    const top=new THREE.Mesh(
+        new THREE.BoxGeometry(
+            40,
+            4,
+            4
+        ),
+        stone
+    );
+
+    top.position.set(
+        0,
+        12,
+        0
+    );
+
+    group.add(top);
+
+    group.position.set(
+        0,
+        0,
+        -430
+    );
+
+    scene.add(group);
+}
+
+createDistrictGate();
+
+
+/* =====================================================
+   بوابة آثار الحضر
+===================================================== */
 
 function createHatraGate(){
 
     const group=new THREE.Group();
 
-    const stone=new THREE.MeshStandardMaterial({
-        color:0xb58a55,
-        roughness:1
-    });
+    const stone=
+        new THREE.MeshStandardMaterial({
+            color:0xb58a55,
+            roughness:1
+        });
 
-    for(const x of [-12,12]){
+    for(
+        const x of [-12,12]
+    ){
 
         const column=new THREE.Mesh(
             new THREE.CylinderGeometry(
-                2.2,2.6,15,12
+                2.2,
+                2.6,
+                15,
+                12
             ),
             stone
         );
 
-        column.position.set(x,7.5,0);
+        column.position.set(
+            x,
+            7.5,
+            0
+        );
+
         column.castShadow=true;
+
         group.add(column);
     }
 
     const top=new THREE.Mesh(
-        new THREE.BoxGeometry(30,5,4),
+        new THREE.BoxGeometry(
+            30,
+            5,
+            4
+        ),
         stone
     );
 
-    top.position.set(0,15,0);
+    top.position.set(
+        0,
+        15,
+        0
+    );
+
     group.add(top);
 
     const temple=new THREE.Mesh(
-        new THREE.BoxGeometry(24,18,15),
+        new THREE.BoxGeometry(
+            24,
+            18,
+            15
+        ),
         stone
     );
 
-    temple.position.set(0,9,-18);
+    temple.position.set(
+        0,
+        9,
+        -18
+    );
+
     group.add(temple);
 
-    group.position.set(0,0,-720);
+    group.position.set(
+        0,
+        0,
+        -720
+    );
+
     scene.add(group);
 }
 
 createHatraGate();
 
-/* =========================
+
+/* =====================================================
+   طريق مركز القضاء إلى الآثار
+===================================================== */
+
+createRoad(
+    0,
+    -660,
+    28,
+    180
+);
+
+
+/* =====================================================
    سيارة اللاعب
-========================= */
+===================================================== */
 
 const car=new THREE.Group();
 
+
 const body=new THREE.Mesh(
-    new THREE.BoxGeometry(4.2,1.3,7),
+    new THREE.BoxGeometry(
+        4.2,
+        1.3,
+        7
+    ),
     new THREE.MeshStandardMaterial({
         color:0x9d1717,
         roughness:.55
@@ -617,11 +1421,18 @@ const body=new THREE.Mesh(
 );
 
 body.position.y=1.3;
+
 body.castShadow=true;
+
 car.add(body);
 
+
 const roof=new THREE.Mesh(
-    new THREE.BoxGeometry(3.25,1.15,3.6),
+    new THREE.BoxGeometry(
+        3.25,
+        1.15,
+        3.6
+    ),
     new THREE.MeshStandardMaterial({
         color:0x15191d,
         roughness:.3,
@@ -629,27 +1440,50 @@ const roof=new THREE.Mesh(
     })
 );
 
-roof.position.set(0,2.25,.15);
+roof.position.set(
+    0,
+    2.25,
+    .15
+);
+
 roof.castShadow=true;
+
 car.add(roof);
 
+
 const front=new THREE.Mesh(
-    new THREE.BoxGeometry(3.7,.35,.7),
+    new THREE.BoxGeometry(
+        3.7,
+        .35,
+        .7
+    ),
     new THREE.MeshStandardMaterial({
         color:0xeeeeee
     })
 );
 
-front.position.set(0,1.25,-3.45);
+front.position.set(
+    0,
+    1.25,
+    -3.45
+);
+
 car.add(front);
+
 
 /* العجلات */
 
-function wheel(x,z){
+function wheel(
+    x,
+    z
+){
 
     const w=new THREE.Mesh(
         new THREE.CylinderGeometry(
-            .78,.78,.55,20
+            .78,
+            .78,
+            .55,
+            20
         ),
         new THREE.MeshStandardMaterial({
             color:0x101010
@@ -657,8 +1491,15 @@ function wheel(x,z){
     );
 
     w.rotation.z=Math.PI/2;
-    w.position.set(x,.8,z);
+
+    w.position.set(
+        x,
+        .8,
+        z
+    );
+
     w.castShadow=true;
+
     car.add(w);
 }
 
@@ -667,26 +1508,44 @@ wheel(2.15,-2.3);
 wheel(-2.15,2.3);
 wheel(2.15,2.3);
 
-car.position.set(0,2,250);
+
+car.position.set(
+    0,
+    2,
+    250
+);
+
 scene.add(car);
 
-/* =========================
+
+/* =====================================================
    التحكم
-========================= */
+===================================================== */
 
 const keys={};
 
-window.addEventListener("keydown",e=>{
-    keys[e.key.toLowerCase()]=true;
-});
+window.addEventListener(
+    "keydown",
+    e=>{
+        keys[e.key.toLowerCase()]=true;
+    }
+);
 
-window.addEventListener("keyup",e=>{
-    keys[e.key.toLowerCase()]=false;
-});
+window.addEventListener(
+    "keyup",
+    e=>{
+        keys[e.key.toLowerCase()]=false;
+    }
+);
 
-function button(id,key){
 
-    const b=document.getElementById(id);
+function button(
+    id,
+    key
+){
+
+    const b=
+        document.getElementById(id);
 
     const start=e=>{
         e.preventDefault();
@@ -698,10 +1557,25 @@ function button(id,key){
         keys[key]=false;
     };
 
-    b.addEventListener("pointerdown",start);
-    b.addEventListener("pointerup",stop);
-    b.addEventListener("pointercancel",stop);
-    b.addEventListener("pointerleave",stop);
+    b.addEventListener(
+        "pointerdown",
+        start
+    );
+
+    b.addEventListener(
+        "pointerup",
+        stop
+    );
+
+    b.addEventListener(
+        "pointercancel",
+        stop
+    );
+
+    b.addEventListener(
+        "pointerleave",
+        stop
+    );
 }
 
 button("up","w");
@@ -709,52 +1583,87 @@ button("down","s");
 button("left","a");
 button("right","d");
 
-/* =========================
+
+/* =====================================================
    حركة السيارة
-========================= */
+===================================================== */
 
 let currentSpeed=0;
 
 function update(){
 
     const acceleration=.035;
+
     const maxSpeed=.9;
 
-    if(keys["w"]||keys["arrowup"]){
+
+    if(
+        keys["w"]||
+        keys["arrowup"]
+    ){
+
         currentSpeed+=acceleration;
     }
-    else if(keys["s"]||keys["arrowdown"]){
+
+    else if(
+        keys["s"]||
+        keys["arrowdown"]
+    ){
+
         currentSpeed-=acceleration;
     }
+
     else{
+
         currentSpeed*=.94;
     }
 
+
     currentSpeed=Math.max(
         -maxSpeed*.55,
-        Math.min(maxSpeed,currentSpeed)
+        Math.min(
+            maxSpeed,
+            currentSpeed
+        )
     );
+
 
     /* التوجيه */
 
-    if(Math.abs(currentSpeed)>.01){
+    if(
+        Math.abs(currentSpeed)>.01
+    ){
 
-        if(keys["a"]||keys["arrowleft"]){
+        if(
+            keys["a"]||
+            keys["arrowleft"]
+        ){
+
             car.rotation.y+=
-                .035*(currentSpeed>=0?1:-1);
+                .035*
+                (currentSpeed>=0?1:-1);
         }
 
-        if(keys["d"]||keys["arrowright"]){
+        if(
+            keys["d"]||
+            keys["arrowright"]
+        ){
+
             car.rotation.y-=
-                .035*(currentSpeed>=0?1:-1);
+                .035*
+                (currentSpeed>=0?1:-1);
         }
     }
 
-    /* الحركة حسب اتجاه السيارة */
 
-    const forward=new THREE.Vector3(
-        0,0,-1
-    );
+    /* الحركة */
+
+    const forward=
+        new THREE.Vector3(
+            0,
+            0,
+            -1
+        );
 
     forward.applyQuaternion(
         car.quaternion
@@ -765,49 +1674,70 @@ function update(){
         currentSpeed
     );
 
+
     /* حدود العالم */
 
     car.position.x=Math.max(
         -430,
-        Math.min(430,car.position.x)
+        Math.min(
+            430,
+            car.position.x
+        )
     );
 
     car.position.z=Math.max(
         -850,
-        Math.min(500,car.position.z)
+        Math.min(
+            500,
+            car.position.z
+        )
     );
+
 
     /* دوران العجلات */
 
-    car.children.forEach(child=>{
+    car.children.forEach(
+        child=>{
 
-        if(
-            child.geometry &&
-            child.geometry.type==="CylinderGeometry"
-        ){
+            if(
+                child.geometry &&
+                child.geometry.type===
+                "CylinderGeometry"
+            ){
 
-            child.rotation.x+=
-                currentSpeed*.08;
+                child.rotation.x+=
+                    currentSpeed*.08;
+            }
         }
-    });
-
-    /* =========================
-       الكاميرا
-    ========================= */
-
-    const behind=new THREE.Vector3(
-        0,8,15
     );
+
+
+    /* =================================================
+       الكاميرا
+    ================================================= */
+
+    const behind=
+        new THREE.Vector3(
+            0,
+            8,
+            15
+        );
 
     behind.applyQuaternion(
         car.quaternion
     );
 
-    const targetCamera=new THREE.Vector3(
-        car.position.x+behind.x,
-        car.position.y+behind.y,
-        car.position.z+behind.z
-    );
+    const targetCamera=
+        new THREE.Vector3(
+            car.position.x+
+                behind.x,
+
+            car.position.y+
+                behind.y,
+
+            car.position.z+
+                behind.z
+        );
 
     camera.position.lerp(
         targetCamera,
@@ -820,61 +1750,128 @@ function update(){
         car.position.z
     );
 
-    /* =========================
-       الموقع
-    ========================= */
+
+    /* =================================================
+       تحديد المنطقة
+    ================================================= */
 
     let area="🛣️ الطريق";
 
-    if(car.position.z>145)
+    let mission=
+        "المهمة: توجه إلى مركز قضاء الحضر";
+
+
+    if(
+        car.position.z>145
+    ){
+
         area="🏙️ مدينة الموصل";
+
+        mission=
+            "المهمة: اعبر جسر الموصل وتوجه جنوباً";
+    }
 
     else if(
         car.position.z<=145 &&
         car.position.z>20
-    )
-        area="🌊 نهر دجلة - جسر الموصل";
+    ){
+
+        area=
+            "🌊 نهر دجلة - جسر الموصل";
+
+        mission=
+            "المهمة: اعبر جسر الموصل";
+    }
 
     else if(
         car.position.z<=20 &&
-        car.position.z>-450
-    )
-        area="🛣️ الطريق باتجاه الحضر";
+        car.position.z>-430
+    ){
+
+        area=
+            "🛣️ الطريق باتجاه الحضر";
+
+        mission=
+            "المهمة: أكمل الطريق إلى مركز قضاء الحضر";
+    }
 
     else if(
-        car.position.z<=-450 &&
-        car.position.z>-700
-    )
-        area="🏜️ منطقة الحضر";
+        car.position.z<=-430 &&
+        car.position.z>-610
+    ){
 
-    else if(car.position.z<=-700)
-        area="🏛️ آثار الحضر";
+        area=
+            "🏘️ مركز قضاء الحضر";
+
+        mission=
+            "المهمة: تجول في مركز قضاء الحضر";
+    }
+
+    else if(
+        car.position.z<=-610 &&
+        car.position.z>-700
+    ){
+
+        area=
+            "🏜️ الطريق إلى آثار الحضر";
+
+        mission=
+            "المهمة: توجه إلى آثار الحضر";
+    }
+
+    else if(
+        car.position.z<=-700
+    ){
+
+        area=
+            "🏛️ آثار الحضر";
+
+        mission=
+            "المهمة: وصلت إلى آثار الحضر";
+    }
+
 
     document.getElementById(
         "location"
     ).textContent=
         area+
         " • X: "+
-        Math.round(car.position.x)+
+        Math.round(
+            car.position.x
+        )+
         " • Z: "+
-        Math.round(car.position.z);
+        Math.round(
+            car.position.z
+        );
+
+
+    document.getElementById(
+        "mission"
+    ).textContent=
+        mission;
+
 
     document.getElementById(
         "speed"
     ).textContent=
         "السرعة: "+
         Math.round(
-            Math.abs(currentSpeed)*100
+            Math.abs(
+                currentSpeed
+            )*100
         );
 }
 
-/* =========================
-   تشغيل
-========================= */
+
+/* =====================================================
+   التشغيل
+===================================================== */
 
 function animate(){
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(
+        animate
+    );
 
     update();
 
@@ -886,9 +1883,10 @@ function animate(){
 
 animate();
 
-/* =========================
-   الشاشة
-========================= */
+
+/* =====================================================
+   تغيير حجم الشاشة
+===================================================== */
 
 window.addEventListener(
     "resize",
@@ -907,5 +1905,7 @@ window.addEventListener(
     }
 );
 
-</script></body>
+</script>
+
+</body>
 </html>
