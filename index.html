@@ -2,8 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>الموصل → الحضر</title>
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>مركز قضاء الحضر 🇮🇶</title>
 
 <style>
 *{
@@ -15,133 +16,135 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#78b7e8;
+  background:#101820;
   font-family:Arial,sans-serif;
-  touch-action:none;
 }
 canvas{
   display:block;
   width:100%;
   height:100%;
+  touch-action:none;
 }
 #hud{
   position:fixed;
-  top:12px;
-  left:12px;
-  right:12px;
+  top:10px;
+  right:10px;
   z-index:5;
   color:white;
-  text-shadow:0 2px 4px #000;
-  pointer-events:none;
+  background:rgba(0,0,0,.48);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+  padding:10px 14px;
+  min-width:190px;
+  backdrop-filter:blur(7px);
 }
-.title{
-  font-size:21px;
+#title{
+  font-size:18px;
   font-weight:bold;
 }
-.info{
-  margin-top:6px;
-  font-size:14px;
-  background:rgba(0,0,0,.35);
-  padding:7px 11px;
+#location{
+  margin-top:5px;
+  color:#ffd66b;
+}
+#speed{
+  margin-top:4px;
+  font-size:13px;
+}
+#hint{
+  position:fixed;
+  top:10px;
+  left:10px;
+  z-index:5;
+  color:white;
+  background:rgba(0,0,0,.4);
   border-radius:12px;
-  display:inline-block;
+  padding:8px 11px;
+  font-size:12px;
 }
 #controls{
   position:fixed;
   left:0;
   right:0;
   bottom:18px;
-  height:150px;
   z-index:10;
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  padding:0 18px;
   pointer-events:none;
 }
 .pad{
-  position:absolute;
-  bottom:0;
   display:grid;
-  gap:7px;
+  grid-template-columns:62px 62px 62px;
+  grid-template-rows:62px 62px;
+  gap:8px;
   pointer-events:auto;
 }
-#steer{
-  left:18px;
-  grid-template-columns:65px 65px 65px;
-  grid-template-rows:65px 65px;
-}
-#drive{
-  right:18px;
-  grid-template-columns:72px;
-  grid-template-rows:65px 65px;
-}
-button{
-  border:1px solid rgba(255,255,255,.4);
-  border-radius:18px;
-  background:rgba(20,25,30,.62);
+.btn{
+  border:1px solid rgba(255,255,255,.28);
+  background:rgba(20,20,20,.65);
   color:white;
-  font-size:29px;
-  font-weight:bold;
-  box-shadow:0 5px 15px rgba(0,0,0,.3);
-  user-select:none;
-}
-button:active{
-  background:rgba(255,255,255,.28);
-  transform:scale(.95);
-}
-#left{grid-column:1;grid-row:2}
-#right{grid-column:3;grid-row:2}
-#up{grid-column:2;grid-row:1}
-#down{grid-column:2;grid-row:2}
-#forward{grid-row:1}
-#brake{grid-row:2;font-size:18px}
-#loading{
-  position:fixed;
-  inset:0;
-  z-index:100;
+  border-radius:18px;
+  font-size:27px;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#182633;
+  user-select:none;
+  touch-action:none;
+  box-shadow:0 5px 15px rgba(0,0,0,.35);
+}
+.btn:active{
+  background:rgba(255,255,255,.25);
+  transform:scale(.94);
+}
+.empty{
+  visibility:hidden;
+}
+#reset{
+  pointer-events:auto;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(20,20,20,.65);
   color:white;
-  font-size:20px;
+  padding:13px 16px;
+  border-radius:15px;
+  font-weight:bold;
+  font-size:13px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="loading">🇮🇶 جاري تشغيل لعبة الموصل والحضر...</div>
-
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div class="title">🇮🇶 الموصل → الحضر</div>
-  <div class="info">
-    📍 <span id="location">الموصل</span>
-    &nbsp; | &nbsp;
-    🚗 <span id="speed">0</span> كم/س
-  </div>
+  <div id="title">🇮🇶 مركز قضاء الحضر</div>
+  <div id="location">الحي الرئيسي</div>
+  <div id="speed">السرعة: 0 كم/س</div>
 </div>
 
+<div id="hint">اسحب الأزرار أو استخدم الأسهم</div>
+
 <div id="controls">
+  <div class="pad">
+    <div class="empty"></div>
+    <div class="btn" data-key="up">▲</div>
+    <div class="empty"></div>
 
-  <div class="pad" id="steer">
-    <button id="up">▲</button>
-    <button id="left">◀</button>
-    <button id="right">▶</button>
-    <button id="down">▼</button>
+    <div class="btn" data-key="left">◀</div>
+    <div class="btn" data-key="down">▼</div>
+    <div class="btn" data-key="right">▶</div>
   </div>
 
-  <div class="pad" id="drive">
-    <button id="forward">غاز</button>
-    <button id="brake">فرامل</button>
-  </div>
-
+  <button id="reset">↻ إعادة السيارة</button>
 </div>
 
 <script>
 "use strict";
 
 /* =========================================================
-   CANVAS / WEBGL
+   HADR OPEN WORLD
+   Pure WebGL - No Three.js - No CDN
 ========================================================= */
 
 const canvas = document.getElementById("game");
@@ -152,98 +155,99 @@ const gl = canvas.getContext("webgl", {
 });
 
 if(!gl){
-  document.getElementById("loading").textContent =
-    "المتصفح لا يدعم WebGL";
+  document.body.innerHTML =
+    "<div style='color:white;padding:30px;font-family:Arial'>المتصفح لا يدعم WebGL</div>";
   throw new Error("WebGL unavailable");
 }
 
-/* =========================================================
-   SHADERS
-========================================================= */
+/* -----------------------------
+   Resize
+----------------------------- */
 
-const vertexShaderSource = `
+function resize(){
+  const dpr = Math.min(devicePixelRatio || 1, 1.7);
+  canvas.width = Math.floor(innerWidth*dpr);
+  canvas.height = Math.floor(innerHeight*dpr);
+  gl.viewport(0,0,canvas.width,canvas.height);
+}
+addEventListener("resize",resize);
+resize();
+
+/* -----------------------------
+   Shaders
+----------------------------- */
+
+const vs = `
 attribute vec3 aPosition;
 attribute vec3 aNormal;
+attribute vec3 aColor;
 
-uniform mat4 uProjection;
-uniform mat4 uView;
+uniform mat4 uMVP;
 uniform mat4 uModel;
 
 varying vec3 vNormal;
+varying vec3 vColor;
 varying vec3 vWorld;
 
 void main(){
-    vec4 world = uModel * vec4(aPosition,1.0);
-    vWorld = world.xyz;
-    vNormal = mat3(uModel) * aNormal;
-
-    gl_Position =
-        uProjection *
-        uView *
-        world;
+  vec4 world = uModel * vec4(aPosition,1.0);
+  vWorld = world.xyz;
+  vNormal = mat3(uModel) * aNormal;
+  vColor = aColor;
+  gl_Position = uMVP * vec4(aPosition,1.0);
 }
 `;
 
-const fragmentShaderSource = `
+const fs = `
 precision mediump float;
 
-uniform vec3 uColor;
-uniform vec3 uLight;
-uniform float uFog;
-
 varying vec3 vNormal;
+varying vec3 vColor;
 varying vec3 vWorld;
+
+uniform vec3 uLight;
+uniform vec3 uCamera;
 
 void main(){
 
-    vec3 n = normalize(vNormal);
+  vec3 N = normalize(vNormal);
+  vec3 L = normalize(uLight - vWorld);
 
-    float light =
-        max(dot(n,normalize(uLight)),0.0);
+  float diffuse = max(dot(N,L),0.0);
 
-    float ambient = 0.32;
+  vec3 V = normalize(uCamera-vWorld);
+  vec3 H = normalize(L+V);
 
-    vec3 finalColor =
-        uColor * (ambient + light * 0.72);
+  float spec = pow(max(dot(N,H),0.0),24.0)*0.20;
 
-    float distanceFromCamera =
-        length(vWorld);
+  float distanceFog =
+    clamp(length(vWorld-uCamera)/520.0,0.0,1.0);
 
-    float fog =
-        clamp(
-          (distanceFromCamera - 130.0) / 300.0,
-          0.0,
-          1.0
-        );
+  vec3 lit =
+    vColor * (0.34 + diffuse*0.66)
+    + vec3(spec);
 
-    finalColor =
-        mix(finalColor,
-            vec3(0.45,0.65,0.82),
-            fog * uFog);
+  vec3 fogColor = vec3(0.43,0.58,0.70);
 
-    gl_FragColor =
-        vec4(finalColor,1.0);
+  lit = mix(lit,fogColor,distanceFog*0.48);
+
+  gl_FragColor = vec4(lit,1.0);
 }
 `;
 
-function compile(type,source){
+function shader(type,src){
   const s=gl.createShader(type);
-  gl.shaderSource(s,source);
+  gl.shaderSource(s,src);
   gl.compileShader(s);
-
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){
     throw new Error(gl.getShaderInfoLog(s));
   }
-
   return s;
 }
 
-const vs=compile(gl.VERTEX_SHADER,vertexShaderSource);
-const fs=compile(gl.FRAGMENT_SHADER,fragmentShaderSource);
-
 const program=gl.createProgram();
-gl.attachShader(program,vs);
-gl.attachShader(program,fs);
+gl.attachShader(program,shader(gl.VERTEX_SHADER,vs));
+gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fs));
 gl.linkProgram(program);
 
 if(!gl.getProgramParameter(program,gl.LINK_STATUS)){
@@ -254,47 +258,44 @@ gl.useProgram(program);
 
 const aPosition=gl.getAttribLocation(program,"aPosition");
 const aNormal=gl.getAttribLocation(program,"aNormal");
+const aColor=gl.getAttribLocation(program,"aColor");
 
-const uProjection=gl.getUniformLocation(program,"uProjection");
-const uView=gl.getUniformLocation(program,"uView");
+const uMVP=gl.getUniformLocation(program,"uMVP");
 const uModel=gl.getUniformLocation(program,"uModel");
-const uColor=gl.getUniformLocation(program,"uColor");
 const uLight=gl.getUniformLocation(program,"uLight");
-const uFog=gl.getUniformLocation(program,"uFog");
+const uCamera=gl.getUniformLocation(program,"uCamera");
 
 /* =========================================================
-   MATRIX
+   Math
 ========================================================= */
 
-function identity(){
-  return [
+function mat4(){
+  return new Float32Array([
     1,0,0,0,
     0,1,0,0,
     0,0,1,0,
     0,0,0,1
-  ];
+  ]);
 }
 
 function multiply(a,b){
+  const o=new Float32Array(16);
 
-  const r=new Array(16);
-
-  for(let c=0;c<4;c++){
-    for(let r0=0;r0<4;r0++){
-
-      r[c*4+r0]=
-        a[0*4+r0]*b[c*4+0]+
-        a[1*4+r0]*b[c*4+1]+
-        a[2*4+r0]*b[c*4+2]+
-        a[3*4+r0]*b[c*4+3];
+  for(let r=0;r<4;r++){
+    for(let c=0;c<4;c++){
+      o[c*4+r]=
+        a[0*4+r]*b[c*4+0]+
+        a[1*4+r]*b[c*4+1]+
+        a[2*4+r]*b[c*4+2]+
+        a[3*4+r]*b[c*4+3];
     }
   }
 
-  return r;
+  return o;
 }
 
 function translation(x,y,z){
-  const m=identity();
+  const m=mat4();
   m[12]=x;
   m[13]=y;
   m[14]=z;
@@ -302,37 +303,35 @@ function translation(x,y,z){
 }
 
 function scale(x,y,z){
-  const m=identity();
+  const m=mat4();
   m[0]=x;
   m[5]=y;
   m[10]=z;
   return m;
 }
 
-function rotateY(a){
-
+function rotationY(a){
   const c=Math.cos(a);
   const s=Math.sin(a);
 
-  return [
+  return new Float32Array([
      c,0,-s,0,
-     0,1,0,0,
-     s,0,c,0,
-     0,0,0,1
-  ];
+     0,1, 0,0,
+     s,0, c,0,
+     0,0, 0,1
+  ]);
 }
 
-function rotateX(a){
-
+function rotationX(a){
   const c=Math.cos(a);
   const s=Math.sin(a);
 
-  return [
-     1,0,0,0,
-     0,c,s,0,
-     0,-s,c,0,
-     0,0,0,1
-  ];
+  return new Float32Array([
+    1,0,0,0,
+    0,c,s,0,
+    0,-s,c,0,
+    0,0,0,1
+  ]);
 }
 
 function perspective(fov,aspect,near,far){
@@ -340,12 +339,12 @@ function perspective(fov,aspect,near,far){
   const f=1/Math.tan(fov/2);
   const nf=1/(near-far);
 
-  return [
+  return new Float32Array([
     f/aspect,0,0,0,
     0,f,0,0,
     0,0,(far+near)*nf,-1,
     0,0,(2*far*near)*nf,0
-  ];
+  ]);
 }
 
 function lookAt(eye,target,up){
@@ -355,168 +354,107 @@ function lookAt(eye,target,up){
   let zz=eye[2]-target[2];
 
   let zl=Math.hypot(zx,zy,zz);
-
-  zx/=zl;
-  zy/=zl;
-  zz/=zl;
+  zx/=zl; zy/=zl; zz/=zl;
 
   let xx=up[1]*zz-up[2]*zy;
   let xy=up[2]*zx-up[0]*zz;
   let xz=up[0]*zy-up[1]*zx;
 
   let xl=Math.hypot(xx,xy,xz);
+  xx/=xl; xy/=xl; xz/=xl;
 
-  xx/=xl;
-  xy/=xl;
-  xz/=xl;
+  const yx=zy*xz-zz*xy;
+  const yy=zz*xx-zx*xz;
+  const yz=zx*xy-zy*xx;
 
-  let yx=zy*xz-zz*xy;
-  let yy=zz*xx-zx*xz;
-  let yz=zx*xy-zy*xx;
-
-  return [
+  return new Float32Array([
     xx,yx,zx,0,
     xy,yy,zy,0,
     xz,yz,zz,0,
-
     -(xx*eye[0]+xy*eye[1]+xz*eye[2]),
     -(yx*eye[0]+yy*eye[1]+yz*eye[2]),
     -(zx*eye[0]+zy*eye[1]+zz*eye[2]),
     1
-  ];
+  ]);
 }
 
 /* =========================================================
-   GEOMETRY
+   Geometry
 ========================================================= */
 
-function createCube(){
+const vertices=[];
+const normals=[];
+const colors=[];
+
+function face(a,b,c,d,n,col){
+
+  vertices.push(
+    ...a,...b,...c,
+    ...a,...c,...d
+  );
+
+  for(let i=0;i<6;i++) normals.push(...n);
+  for(let i=0;i<6;i++) colors.push(...col);
+}
+
+function cubeGeometry(){
 
   const p=[
-    // front
-    -1,-1, 1, 1,-1, 1, 1,1,1,
-    -1,-1, 1, 1,1,1, -1,1,1,
+    [-.5,-.5,.5],
+    [.5,-.5,.5],
+    [.5,.5,.5],
+    [-.5,.5,.5],
 
-    // back
-     1,-1,-1,-1,-1,-1,-1,1,-1,
-     1,-1,-1,-1,1,-1,1,1,-1,
-
-    // left
-    -1,-1,-1,-1,-1,1,-1,1,1,
-    -1,-1,-1,-1,1,1,-1,1,-1,
-
-    // right
-    1,-1,1,1,-1,-1,1,1,-1,
-    1,-1,1,1,1,-1,1,1,1,
-
-    // top
-    -1,1,1,1,1,1,1,1,-1,
-    -1,1,1,1,1,-1,-1,1,-1,
-
-    // bottom
-    -1,-1,-1,1,-1,-1,1,-1,1,
-    -1,-1,-1,1,-1,1,-1,-1,1
+    [-.5,-.5,-.5],
+    [.5,-.5,-.5],
+    [.5,.5,-.5],
+    [-.5,.5,-.5]
   ];
 
-  const n=[
-    0,0,1, 0,0,1, 0,0,1,
-    0,0,1, 0,0,1, 0,0,1,
-
-    0,0,-1, 0,0,-1, 0,0,-1,
-    0,0,-1, 0,0,-1, 0,0,-1,
-
-    -1,0,0,-1,0,0,-1,0,0,
-    -1,0,0,-1,0,0,-1,0,0,
-
-    1,0,0,1,0,0,1,0,0,
-    1,0,0,1,0,0,1,0,0,
-
-    0,1,0,0,1,0,0,1,0,
-    0,1,0,0,1,0,0,1,0,
-
-    0,-1,0,0,-1,0,0,-1,0,
-    0,-1,0,0,-1,0,0,-1,0
-  ];
-
-  const vb=gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER,vb);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(p),
-    gl.STATIC_DRAW
-  );
-
-  const nb=gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER,nb);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(n),
-    gl.STATIC_DRAW
-  );
-
-  return {
-    vb:vb,
-    nb:nb,
-    count:36
-  };
+  face(p[0],p[1],p[2],p[3],[0,0,1],[1,1,1]);
+  face(p[5],p[4],p[7],p[6],[0,0,-1],[1,1,1]);
+  face(p[4],p[0],p[3],p[7],[-1,0,0],[1,1,1]);
+  face(p[1],p[5],p[6],p[2],[1,0,0],[1,1,1]);
+  face(p[3],p[2],p[6],p[7],[0,1,0],[1,1,1]);
+  face(p[4],p[5],p[1],p[0],[0,-1,0],[1,1,1]);
 }
 
-const cube=createCube();
+cubeGeometry();
+
+const baseV=new Float32Array(vertices);
+const baseN=new Float32Array(normals);
+const baseC=new Float32Array(colors);
+
+const vbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+gl.bufferData(gl.ARRAY_BUFFER,baseV,gl.STATIC_DRAW);
+
+gl.enableVertexAttribArray(aPosition);
+gl.vertexAttribPointer(aPosition,3,gl.FLOAT,false,0,0);
+
+const nbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,nbo);
+gl.bufferData(gl.ARRAY_BUFFER,baseN,gl.STATIC_DRAW);
+
+gl.enableVertexAttribArray(aNormal);
+gl.vertexAttribPointer(aNormal,3,gl.FLOAT,false,0,0);
+
+const cbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,cbo);
+gl.bufferData(gl.ARRAY_BUFFER,baseC,gl.STATIC_DRAW);
+
+gl.enableVertexAttribArray(aColor);
+gl.vertexAttribPointer(aColor,3,gl.FLOAT,false,0,0);
 
 /* =========================================================
-   DRAW CUBE
-========================================================= */
-
-function drawCube(x,y,z,sx,sy,sz,color,rot=0){
-
-  let model =
-    multiply(
-      translation(x,y,z),
-      multiply(
-        rotateY(rot),
-        scale(sx,sy,sz)
-      )
-    );
-
-  gl.bindBuffer(gl.ARRAY_BUFFER,cube.vb);
-  gl.enableVertexAttribArray(aPosition);
-  gl.vertexAttribPointer(
-    aPosition,3,gl.FLOAT,false,0,0
-  );
-
-  gl.bindBuffer(gl.ARRAY_BUFFER,cube.nb);
-  gl.enableVertexAttribArray(aNormal);
-  gl.vertexAttribPointer(
-    aNormal,3,gl.FLOAT,false,0,0
-  );
-
-  gl.uniformMatrix4fv(
-    uModel,false,new Float32Array(model)
-  );
-
-  gl.uniform3fv(
-    uColor,new Float32Array(color)
-  );
-
-  gl.drawArrays(
-    gl.TRIANGLES,0,cube.count
-  );
-}
-
-/* =========================================================
-   WORLD
+   World Objects
 ========================================================= */
 
 const objects=[];
 
-function addBox(
-  x,y,z,
-  sx,sy,sz,
-  color,
-  rot=0
-){
+function addCube(x,y,z,sx,sy,sz,color,rot=0){
+
   objects.push({
-    type:"box",
     x,y,z,
     sx,sy,sz,
     color,
@@ -524,663 +462,603 @@ function addBox(
   });
 }
 
-/* الأرض */
+/* -----------------------------
+   Ground
+----------------------------- */
 
-addBox(
-  0,-2,0,
-  180,2,650,
-  [0.38,0.47,0.29]
-);
+addCube(0,-2,0,900,3,900,[0.34,0.42,0.27]);
 
-/* الطريق الرئيسي */
+/* -----------------------------
+   Main Roads
+----------------------------- */
 
-addBox(
-  0,0,0,
-  7,0.18,650,
-  [0.08,0.09,0.085]
-);
+addCube(0,-.38,0,24,.25,900,[0.11,0.12,0.12]);
+addCube(0,-.25,0,9,.08,900,[0.18,0.19,0.19]);
 
-/* أكتاف الطريق */
+addCube(0,-.37,0,900,.25,24,[0.11,0.12,0.12]);
+addCube(0,-.24,0,900,.08,9,[0.18,0.19,0.19]);
 
-addBox(
-  -9,0.01,0,
-  2,0.12,650,
-  [0.55,0.48,0.34]
-);
+/* -----------------------------
+   Sidewalks
+----------------------------- */
 
-addBox(
-   9,0.01,0,
-   2,0.12,650,
-   [0.55,0.48,0.34]
-);
+addCube(-15,-.15,0,5,.35,900,[0.47,0.47,0.43]);
+addCube(15,-.15,0,5,.35,900,[0.47,0.47,0.43]);
 
-/* =========================================================
-   ROAD MARKINGS
-========================================================= */
+addCube(0,-.15,-15,900,.35,5,[0.47,0.47,0.43]);
+addCube(0,-.15,15,900,.35,5,[0.47,0.47,0.43]);
 
-for(let z=-620;z<620;z+=16){
+/* -----------------------------
+   Lane Markings
+----------------------------- */
 
-  addBox(
-    0,0.22,z,
-    0.16,0.025,5,
-    [0.95,0.88,0.45]
-  );
+for(let z=-420;z<=420;z+=22){
+  addCube(0,.02,z,.35,.05,10,[0.95,0.82,0.35]);
 }
 
-/* حواجز الطريق */
-
-for(let z=-620;z<620;z+=14){
-
-  addBox(
-    -7.5,0.65,z,
-    0.12,0.65,0.12,
-    [0.72,0.72,0.68]
-  );
-
-  addBox(
-     7.5,0.65,z,
-     0.12,0.65,0.12,
-     [0.72,0.72,0.68]
-  );
+for(let x=-420;x<=420;x+=22){
+  addCube(x,.02,0,10,.05,.35,[0.95,0.82,0.35]);
 }
 
 /* =========================================================
-   BUILDINGS
+   Buildings
 ========================================================= */
 
-function building(x,z,w,h,d,color){
+function building(x,z,w,d,h,body,roof){
 
-  addBox(
-    x,
-    h/2,
-    z,
-    w/2,
-    h/2,
-    d/2,
-    color
-  );
+  addCube(x,h/2-.1,z,w,h,d,body);
 
-  /* سطح المبنى */
+  addCube(x,h+.12,z,w+.3,.25,d+.3,roof);
 
-  addBox(
-    x,
-    h+0.12,
-    z,
-    w/2+0.08,
-    0.12,
-    d/2+0.08,
-    [0.22,0.18,0.14]
-  );
-}
+  /* windows front */
+  const floors=Math.max(1,Math.floor(h/3));
 
-/* الموصل */
+  for(let fy=1;fy<=floors;fy++){
 
-for(let z=450;z>100;z-=28){
+    const y=fy*3-1;
 
-  building(
-    -17,z,
-    10,
-    6+(Math.abs(z)%18),
-    12,
-    [0.55,0.50,0.43]
-  );
+    for(let i=-1;i<=1;i++){
 
-  building(
-     17,z-10,
-     10,
-     5+(Math.abs(z)%20),
-     12,
-     [0.62,0.55,0.45]
-  );
-}
+      if(Math.abs(i)>1) continue;
 
-/* المنطقة الريفية */
+      addCube(
+        x+i*(w*.25),
+        y,
+        z-d/2-.03,
+        Math.max(.8,w*.13),
+        1.25,
+        .08,
+        [0.12,0.22,0.28]
+      );
 
-for(let z=100;z>-120;z-=38){
-
-  building(
-    -19,z,
-    9,4.5,9,
-    [0.62,0.51,0.37]
-  );
-
-  building(
-    19,z-18,
-    9,4,9,
-    [0.66,0.56,0.42]
-  );
-}
-
-/* =========================================================
-   TREES
-========================================================= */
-
-function tree(x,z,size=1){
-
-  /* جذع */
-
-  addBox(
-    x,
-    1.4*size,
-    z,
-    0.45*size,
-    1.4*size,
-    0.45*size,
-    [0.27,0.16,0.08]
-  );
-
-  /* تاج */
-
-  addBox(
-    x,
-    3.1*size,
-    z,
-    1.7*size,
-    1.7*size,
-    1.7*size,
-    [0.12,0.32,0.12]
-  );
-}
-
-for(let z=430;z>-150;z-=34){
-
-  tree(-13,z,1);
-  tree(13,z-14,0.9);
-
-  if(z%68===0){
-    tree(-24,z-10,1.15);
-    tree(24,z-22,1.15);
+      addCube(
+        x+i*(w*.25),
+        y,
+        z+d/2+.03,
+        Math.max(.8,w*.13),
+        1.25,
+        .08,
+        [0.12,0.22,0.28]
+      );
+    }
   }
 }
 
-/* =========================================================
-   TIGRIS
-========================================================= */
-
-/* نهر دجلة */
-
-addBox(
-  70,-1.3,210,
-  48,1.2,120,
-  [0.06,0.30,0.48]
-);
-
-/* ضفة */
-
-addBox(
-  38,-0.6,210,
-  12,0.4,120,
-  [0.45,0.40,0.26]
-);
-
-/* =========================================================
-   BRIDGE
-========================================================= */
-
-addBox(
-  0,2,210,
-  11,0.6,65,
-  [0.40,0.40,0.38]
-);
-
-for(let z=150;z<=270;z+=12){
-
-  addBox(
-    -10,4,z,
-    0.5,2,0.5,
-    [0.25,0.25,0.24]
-  );
-
-  addBox(
-     10,4,z,
-     0.5,2,0.5,
-     [0.25,0.25,0.24]
-  );
-}
-
-/* =========================================================
-   HATRA DISTRICT
-========================================================= */
-
-for(let z=-180;z>-360;z-=34){
+/* North neighbourhood */
+for(let x=-85;x<=85;x+=32){
 
   building(
-    -18,z,
-    10,5,10,
-    [0.48,0.35,0.23]
+    x,-75,
+    22,25,
+    8+((Math.abs(x)%3)*2),
+    [0.63,0.54,0.43],
+    [0.34,0.29,0.24]
   );
 
   building(
-     18,z-15,
-     10,5.5,10,
-     [0.53,0.39,0.25]
+    x,75,
+    22,25,
+    7+((Math.abs(x)%4)*1.5),
+    [0.72,0.62,0.49],
+    [0.32,0.27,0.21]
   );
 }
 
+/* East/West */
+for(let z=-110;z<=110;z+=34){
+
+  building(
+    -75,z,
+    25,24,
+    7+(Math.abs(z)%3),
+    [0.58,0.50,0.42],
+    [0.28,0.24,0.21]
+  );
+
+  building(
+    75,z,
+    25,24,
+    8+(Math.abs(z)%4),
+    [0.68,0.57,0.44],
+    [0.30,0.25,0.20]
+  );
+}
+
+/* -----------------------------
+   Larger city buildings
+----------------------------- */
+
+building(-40,-42,30,28,15,[0.52,0.50,0.46],[0.25,0.25,0.23]);
+building(40,42,34,30,18,[0.59,0.55,0.47],[0.28,0.25,0.21]);
+
 /* =========================================================
-   HATRA CITY
+   Shops
 ========================================================= */
 
-function hatraBuilding(x,z,h,w){
+function shop(x,z){
 
-  addBox(
-    x,
-    h/2,
-    z,
-    w/2,
-    h/2,
-    w/2,
-    [0.55,0.36,0.19]
-  );
+  addCube(x,3,z,16,6,13,[0.66,0.48,0.30]);
 
-  addBox(
-    x,
-    h+0.4,
-    z,
-    w/2+0.25,
-    0.4,
-    w/2+0.25,
-    [0.68,0.46,0.25]
-  );
+  addCube(x,2.5,z-6.6,13,4,.25,[0.08,0.13,0.15]);
+
+  addCube(x,6.5,z-6.7,14,.9,.4,[0.83,0.63,0.18]);
 }
 
-for(let i=0;i<8;i++){
-
-  const angle=i*Math.PI/4;
-
-  const x=Math.cos(angle)*28;
-  const z=-510+Math.sin(angle)*28;
-
-  hatraBuilding(
-    x,z,
-    8+(i%3)*2,
-    8
-  );
-}
+shop(-35,-115);
+shop(35,-115);
+shop(-115,35);
+shop(115,-35);
 
 /* =========================================================
-   HATRA MAIN TEMPLE
+   Trees
 ========================================================= */
 
-addBox(
-  0,5,-510,
-  18,5,8,
-  [0.65,0.43,0.23]
-);
+function tree(x,z){
 
-/* أعمدة المعبد */
+  addCube(x,2,z,1.3,4,1.3,[0.27,0.16,0.08]);
 
-for(let x=-15;x<=15;x+=5){
+  addCube(x,5,z,5,5,5,[0.12,0.34,0.14]);
 
-  addBox(
-    x,
-    5,-499,
-    1.15,5.5,1.15,
-    [0.76,0.54,0.31]
-  );
+  addCube(x,7,z,3.7,3.7,3.7,[0.16,0.40,0.17]);
+}
 
-  addBox(
-    x,
-    5,-521,
-    1.15,5.5,1.15,
-    [0.76,0.54,0.31]
+for(let x=-120;x<=120;x+=30){
+  tree(x,-23);
+  tree(x,23);
+}
+
+for(let z=-120;z<=120;z+=30){
+  tree(-23,z);
+  tree(23,z);
+}
+
+/* =========================================================
+   Street Lamps
+========================================================= */
+
+function lamp(x,z){
+
+  addCube(x,5,z,.45,10,.45,[0.12,0.13,0.14]);
+
+  addCube(x+1.5,10,z,3,.25,.25,[0.12,0.13,0.14]);
+
+  addCube(x+3,9.8,z,1,.7,1,[0.95,0.78,0.40]);
+}
+
+for(let z=-150;z<=150;z+=35){
+  lamp(-20,z);
+  lamp(20,z);
+}
+
+for(let x=-150;x<=150;x+=35){
+  lamp(x,-20);
+  lamp(x,20);
+}
+
+/* =========================================================
+   Traffic Signs
+========================================================= */
+
+function sign(x,z){
+
+  addCube(x,2,z,.25,4,.25,[0.25,0.25,0.25]);
+
+  addCube(x,4,z,.15,2.2,2.2,[0.82,0.08,0.05]);
+}
+
+sign(-13,-13);
+sign(13,13);
+sign(-13,13);
+sign(13,-13);
+
+/* =========================================================
+   City Center Plaza
+========================================================= */
+
+addCube(0,.02,55,42,.1,32,[0.48,0.46,0.40]);
+
+addCube(0,2,55,5,4,5,[0.65,0.56,0.38]);
+
+for(let a=0;a<Math.PI*2;a+=Math.PI/2){
+
+  tree(
+    Math.cos(a)*14,
+    55+Math.sin(a)*10
   );
 }
 
-/* بوابة الحضر */
+/* =========================================================
+   Hatra District Gate
+========================================================= */
 
-addBox(
-  0,8,-455,
-  16,8,2,
-  [0.58,0.37,0.20]
-);
+function gate(){
 
-addBox(
-  -13,4,-455,
-  3,4,3,
-  [0.67,0.43,0.22]
-);
+  addCube(0,7,190,8,14,6,[0.55,0.42,0.28]);
+  addCube(-13,7,190,8,14,6,[0.55,0.42,0.28]);
+  addCube(13,7,190,8,14,6,[0.55,0.42,0.28]);
 
-addBox(
-   13,4,-455,
-   3,4,3,
-   [0.67,0.43,0.22]
-);
+  addCube(0,13.5,190,34,2,7,[0.68,0.53,0.31]);
+}
+
+gate();
 
 /* =========================================================
-   CAR
+   Desert / Outer Area
+========================================================= */
+
+for(let i=0;i<100;i++){
+
+  const x=(Math.random()-.5)*500;
+  const z=220+Math.random()*300;
+
+  if(Math.abs(x)<35) continue;
+
+  addCube(
+    x,
+    .3,
+    z,
+    2+Math.random()*5,
+    .6+Math.random()*1.5,
+    2+Math.random()*5,
+    [0.42,0.35,0.24],
+    Math.random()*Math.PI
+  );
+}
+
+/* =========================================================
+   Car
 ========================================================= */
 
 const car={
   x:0,
-  y:1,
-  z:340,
-  rotation:0,
-  speed:0,
-  steering:0
+  y:.65,
+  z:-45,
+  angle:0,
+  speed:0
 };
 
-function drawCar(){
+function carPart(x,y,z,sx,sy,sz,color){
 
-  const x=car.x;
-  const y=car.y;
-  const z=car.z;
-  const r=car.rotation;
-
-  /* الجسم */
-
-  drawCube(
-    x,
-    y,
-    z,
-    2.1,
-    0.55,
-    3.8,
-    [0.62,0.035,0.025],
-    r
-  );
-
-  /* غطاء المحرك */
-
-  drawCube(
-    x,
-    y+0.55,
-    z-0.65,
-    1.75,
-    0.18,
-    1.15,
-    [0.75,0.045,0.03],
-    r
-  );
-
-  /* السقف */
-
-  drawCube(
-    x,
-    y+1.05,
-    z+0.35,
-    1.55,
-    0.48,
-    1.75,
-    [0.08,0.11,0.13],
-    r
-  );
-
-  /* الزجاج الأمامي */
-
-  drawCube(
-    x,
-    y+1.08,
-    z-0.58,
-    1.42,
-    0.35,
-    0.12,
-    [0.10,0.25,0.34],
-    r
-  );
-
-  /* المصابيح */
-
-  drawCube(
-    x-1.35,
-    y+0.45,
-    z-1.75,
-    0.3,0.22,0.12,
-    [1.0,0.85,0.45],
-    r
-  );
-
-  drawCube(
-    x+1.35,
-    y+0.45,
-    z-1.75,
-    0.3,0.22,0.12,
-    [1.0,0.85,0.45],
-    r
-  );
-
-  /* العجلات */
-
-  drawCube(
-    x-2.05,
-    y-0.05,
-    z-1.35,
-    0.38,0.48,0.7,
-    [0.025,0.025,0.025],
-    r
-  );
-
-  drawCube(
-    x+2.05,
-    y-0.05,
-    z-1.35,
-    0.38,0.48,0.7,
-    [0.025,0.025,0.025],
-    r
-  );
-
-  drawCube(
-    x-2.05,
-    y-0.05,
-    z+1.35,
-    0.38,0.48,0.7,
-    [0.025,0.025,0.025],
-    r
-  );
-
-  drawCube(
-    x+2.05,
-    y-0.05,
-    z+1.35,
-    0.38,0.48,0.7,
-    [0.025,0.025,0.025],
-    r
+  addCube(
+    x,y,z,
+    sx,sy,sz,
+    color,
+    car.angle
   );
 }
 
+function drawCar(){
+
+  const c=car;
+
+  /* body */
+  addCube(
+    c.x,
+    c.y,
+    c.z,
+    4.8,
+    1.25,
+    8.2,
+    [0.72,0.035,0.035],
+    c.angle
+  );
+
+  /* lower body */
+  addCube(
+    c.x,
+    c.y-.35,
+    c.z,
+    5.2,
+    .55,
+    8.6,
+    [0.42,0.025,0.025],
+    c.angle
+  );
+
+  /* cabin */
+  addCube(
+    c.x,
+    c.y+1.15,
+    c.z+.35,
+    4.0,
+    1.35,
+    4.1,
+    [0.08,0.11,0.13],
+    c.angle
+  );
+
+  /* roof */
+  addCube(
+    c.x,
+    c.y+1.85,
+    c.z+.35,
+    3.6,
+    .25,
+    3.7,
+    [0.16,0.17,0.18],
+    c.angle
+  );
+
+  /* windshield */
+  addCube(
+    c.x,
+    c.y+1.35,
+    c.z-1.75,
+    3.5,
+    .8,
+    .08,
+    [0.08,0.22,0.30],
+    c.angle
+  );
+
+  /* rear glass */
+  addCube(
+    c.x,
+    c.y+1.35,
+    c.z+2.45,
+    3.5,
+    .8,
+    .08,
+    [0.07,0.17,0.22],
+    c.angle
+  );
+
+  /* front bumper */
+  addCube(
+    c.x,
+    c.y-.05,
+    c.z-4.25,
+    5.1,
+    .35,
+    .35,
+    [0.08,0.08,0.08],
+    c.angle
+  );
+
+  /* headlights */
+  addCube(
+    c.x-1.55,
+    c.y+.15,
+    c.z-4.43,
+    .75,
+    .45,
+    .15,
+    [1.0,.88,.45],
+    c.angle
+  );
+
+  addCube(
+    c.x+1.55,
+    c.y+.15,
+    c.z-4.43,
+    .75,
+    .45,
+    .15,
+    [1.0,.88,.45],
+    c.angle
+  );
+
+  /* wheels */
+  const wheels=[
+    [-2.45,.2,-2.65],
+    [2.45,.2,-2.65],
+    [-2.45,.2,2.65],
+    [2.45,.2,2.65]
+  ];
+
+  for(const w of wheels){
+
+    addCube(
+      c.x+w[0],
+      w[1],
+      c.z+w[2],
+      .75,
+      1.4,
+      1.65,
+      [.035,.035,.035],
+      c.angle
+    );
+  }
+}
+
 /* =========================================================
-   INPUT
+   Camera
+========================================================= */
+
+let camera=[0,7,5];
+
+function updateCamera(){
+
+  const behind=13;
+  const side=0;
+
+  const tx=car.x + Math.sin(car.angle)*behind;
+  const tz=car.z + Math.cos(car.angle)*behind;
+
+  camera=[
+    tx,
+    6.2,
+    tz
+  ];
+}
+
+/* =========================================================
+   Controls
 ========================================================= */
 
 const keys={
-  forward:false,
-  brake:false,
+  up:false,
+  down:false,
   left:false,
   right:false
 };
 
-function bind(id,key){
-
-  const b=document.getElementById(id);
-
-  const down=e=>{
-    e.preventDefault();
-    keys[key]=true;
-  };
-
-  const up=e=>{
-    e.preventDefault();
-    keys[key]=false;
-  };
-
-  b.addEventListener("touchstart",down,{passive:false});
-  b.addEventListener("touchend",up,{passive:false});
-  b.addEventListener("touchcancel",up,{passive:false});
-
-  b.addEventListener("mousedown",down);
-  b.addEventListener("mouseup",up);
-  b.addEventListener("mouseleave",up);
+function setKey(k,v){
+  keys[k]=v;
 }
 
-bind("forward","forward");
-bind("brake","brake");
-bind("left","left");
-bind("right","right");
+document.querySelectorAll(".btn").forEach(btn=>{
 
-document.addEventListener("keydown",e=>{
+  const k=btn.dataset.key;
 
-  if(e.key==="ArrowUp" || e.key==="w")
-    keys.forward=true;
+  btn.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    btn.setPointerCapture(e.pointerId);
+    setKey(k,true);
+  });
 
-  if(e.key==="ArrowDown" || e.key==="s")
-    keys.brake=true;
+  btn.addEventListener("pointerup",e=>{
+    e.preventDefault();
+    setKey(k,false);
+  });
 
-  if(e.key==="ArrowLeft" || e.key==="a")
-    keys.left=true;
+  btn.addEventListener("pointercancel",()=>{
+    setKey(k,false);
+  });
 
-  if(e.key==="ArrowRight" || e.key==="d")
-    keys.right=true;
+  btn.addEventListener("pointerleave",()=>{
+    setKey(k,false);
+  });
 });
 
-document.addEventListener("keyup",e=>{
+addEventListener("keydown",e=>{
 
-  if(e.key==="ArrowUp" || e.key==="w")
-    keys.forward=false;
-
-  if(e.key==="ArrowDown" || e.key==="s")
-    keys.brake=false;
-
-  if(e.key==="ArrowLeft" || e.key==="a")
-    keys.left=false;
-
-  if(e.key==="ArrowRight" || e.key==="d")
-    keys.right=false;
+  if(e.key==="ArrowUp" || e.key==="w") keys.up=true;
+  if(e.key==="ArrowDown" || e.key==="s") keys.down=true;
+  if(e.key==="ArrowLeft" || e.key==="a") keys.left=true;
+  if(e.key==="ArrowRight" || e.key==="d") keys.right=true;
 });
 
-/* =========================================================
-   CAMERA
-========================================================= */
+addEventListener("keyup",e=>{
 
-let camera={
-  x:0,
-  y:7,
-  z:350
+  if(e.key==="ArrowUp" || e.key==="w") keys.up=false;
+  if(e.key==="ArrowDown" || e.key==="s") keys.down=false;
+  if(e.key==="ArrowLeft" || e.key==="a") keys.left=false;
+  if(e.key==="ArrowRight" || e.key==="d") keys.right=false;
+});
+
+/* -----------------------------
+   Reset
+----------------------------- */
+
+document.getElementById("reset").onclick=()=>{
+
+  car.x=0;
+  car.z=-45;
+  car.angle=0;
+  car.speed=0;
 };
 
 /* =========================================================
-   RESIZE
+   Driving
 ========================================================= */
 
-function resize(){
+function updateCar(dt){
 
-  const dpr=Math.min(window.devicePixelRatio||1,1.5);
+  const acceleration=keys.up ? 16 : 0;
+  const braking=keys.down ? 20 : 0;
 
-  canvas.width=
-    Math.floor(innerWidth*dpr);
-
-  canvas.height=
-    Math.floor(innerHeight*dpr);
-
-  gl.viewport(
-    0,0,
-    canvas.width,
-    canvas.height
-  );
-}
-
-window.addEventListener("resize",resize);
-resize();
-
-/* =========================================================
-   GAME UPDATE
-========================================================= */
-
-function update(dt){
-
-  /* acceleration */
-
-  if(keys.forward){
-
-    car.speed += 18*dt;
-
-  }else{
-
-    car.speed -= 7*dt;
+  if(keys.up){
+    car.speed += acceleration*dt;
   }
 
-  if(keys.brake){
-
-    car.speed -= 28*dt;
+  if(keys.down){
+    car.speed -= braking*dt;
   }
 
-  car.speed=
-    Math.max(0,Math.min(65,car.speed));
+  if(!keys.up && !keys.down){
 
-  /* steering */
+    if(car.speed>0)
+      car.speed=Math.max(0,car.speed-7*dt);
+
+    if(car.speed<0)
+      car.speed=Math.min(0,car.speed+7*dt);
+  }
+
+  car.speed=Math.max(-8,Math.min(28,car.speed));
+
+  const steer=1.65;
 
   if(keys.left)
-    car.rotation += 1.35*dt;
+    car.angle -= steer*dt*(0.35+Math.abs(car.speed)/18);
 
   if(keys.right)
-    car.rotation -= 1.35*dt;
+    car.angle += steer*dt*(0.35+Math.abs(car.speed)/18);
 
-  /* direction */
+  car.x += Math.sin(car.angle)*car.speed*dt;
+  car.z += Math.cos(car.angle)*car.speed*dt;
 
-  const dx=Math.sin(car.rotation);
-  const dz=-Math.cos(car.rotation);
-
-  car.x += dx*car.speed*dt;
-  car.z += dz*car.speed*dt;
-
-  /* keep car around road */
-
-  car.x=Math.max(-5.4,Math.min(5.4,car.x));
-
-  /* camera */
-
-  const cameraDistance=13;
-
-  const targetX=
-    car.x-dx*cameraDistance;
-
-  const targetZ=
-    car.z-dz*cameraDistance;
-
-  camera.x +=
-    (targetX-camera.x)*Math.min(1,dt*5);
-
-  camera.z +=
-    (targetZ-camera.z)*Math.min(1,dt*5);
-
-  camera.y +=
-    ((car.y+6.5)-camera.y)*
-    Math.min(1,dt*4);
-
-  /* location */
-
-  let location="الموصل";
-
-  if(car.z<270 && car.z>100)
-    location="طريق دجلة";
-
-  if(car.z<=100 && car.z>-180)
-    location="الطريق إلى الحضر";
-
-  if(car.z<=-180 && car.z>-430)
-    location="قضاء الحضر";
-
-  if(car.z<=-430)
-    location="🏛️ مدينة الحضر الأثرية";
-
-  document.getElementById("location").textContent=location;
-
-  document.getElementById("speed").textContent=
-    Math.round(car.speed);
+  /* city boundaries */
+  car.x=Math.max(-260,Math.min(260,car.x));
+  car.z=Math.max(-260,Math.min(480,car.z));
 }
 
 /* =========================================================
-   RENDER
+   Rendering
 ========================================================= */
 
-function render(){
+function drawObject(o,viewProj){
 
-  gl.enable(gl.DEPTH_TEST);
-  gl.depthFunc(gl.LEQUAL);
+  const model=
+    multiply(
+      translation(o.x,o.y,o.z),
+      multiply(
+        rotationY(o.rot||0),
+        scale(o.sx,o.sy,o.sz)
+      )
+    );
+
+  const mvp=multiply(viewProj,model);
+
+  gl.uniformMatrix4fv(uModel,false,model);
+  gl.uniformMatrix4fv(uMVP,false,mvp);
+
+  /* change cube vertex colors */
+  const arr=new Float32Array(baseC.length);
+
+  for(let i=0;i<arr.length;i+=3){
+
+    arr[i]=o.color[0];
+    arr[i+1]=o.color[1];
+    arr[i+2]=o.color[2];
+  }
+
+  gl.bindBuffer(gl.ARRAY_BUFFER,cbo);
+  gl.bufferData(gl.ARRAY_BUFFER,arr,gl.DYNAMIC_DRAW);
+
+  gl.drawArrays(gl.TRIANGLES,0,baseV.length/3);
+}
+
+/* =========================================================
+   Sky
+========================================================= */
+
+function sky(){
 
   gl.clearColor(
-    0.43,
-    0.66,
-    0.86,
+    .43,
+    .62,
+    .78,
     1
   );
 
@@ -1188,100 +1066,169 @@ function render(){
     gl.COLOR_BUFFER_BIT |
     gl.DEPTH_BUFFER_BIT
   );
-
-  const aspect=
-    canvas.width/canvas.height;
-
-  const projection=
-    perspective(
-      60*Math.PI/180,
-      aspect,
-      0.1,
-      700
-    );
-
-  const target=[
-    car.x,
-    car.y+0.8,
-    car.z-8
-  ];
-
-  const view=
-    lookAt(
-      [camera.x,camera.y,camera.z],
-      target,
-      [0,1,0]
-    );
-
-  gl.uniformMatrix4fv(
-    uProjection,
-    false,
-    new Float32Array(projection)
-  );
-
-  gl.uniformMatrix4fv(
-    uView,
-    false,
-    new Float32Array(view)
-  );
-
-  gl.uniform3fv(
-    uLight,
-    new Float32Array([
-      -0.4,
-      1.0,
-      0.3
-    ])
-  );
-
-  gl.uniform1f(uFog,0.75);
-
-  /* العالم */
-
-  for(const o of objects){
-
-    drawCube(
-      o.x,o.y,o.z,
-      o.sx,o.sy,o.sz,
-      o.color,
-      o.rot
-    );
-  }
-
-  /* السيارة */
-
-  drawCar();
 }
 
 /* =========================================================
-   LOOP
+   Main Loop
 ========================================================= */
 
-let last=performance.now();
+gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.CULL_FACE);
+gl.cullFace(gl.BACK);
+
+let previous=performance.now();
 
 function loop(now){
 
-  const dt=
-    Math.min(
-      0.04,
-      (now-last)/1000
-    );
+  const dt=Math.min((now-previous)/1000,.05);
+  previous=now;
 
-  last=now;
+  updateCar(dt);
+  drawCar();
+  updateCamera();
 
-  update(dt);
-  render();
+  sky();
+
+  const aspect=canvas.width/canvas.height;
+
+  const proj=perspective(
+    Math.PI/3,
+    aspect,
+    .1,
+    900
+  );
+
+  const target=[
+    car.x,
+    car.y+.8,
+    car.z
+  ];
+
+  const view=lookAt(
+    camera,
+    target,
+    [0,1,0]
+  );
+
+  const vp=multiply(proj,view);
+
+  gl.uniform3f(
+    uLight,
+    -120,
+    180,
+    -100
+  );
+
+  gl.uniform3f(
+    uCamera,
+    camera[0],
+    camera[1],
+    camera[2]
+  );
+
+  for(const o of objects){
+    drawObject(o,vp);
+  }
+
+  /* remove temporary car objects */
+  objects.length =
+    objects.length -
+    0;
+
+  document.getElementById("speed").textContent =
+    "السرعة: " +
+    Math.round(Math.abs(car.speed)*4) +
+    " كم/س";
+
+  if(car.z<70){
+    document.getElementById("location").textContent =
+      "📍 مركز قضاء الحضر";
+  }else if(car.z<190){
+    document.getElementById("location").textContent =
+      "📍 أطراف مركز القضاء";
+  }else{
+    document.getElementById("location").textContent =
+      "📍 طريق الحضر";
+  }
 
   requestAnimationFrame(loop);
 }
 
-/* =========================================================
-   START
-========================================================= */
+/*
+  Important:
+  car parts are added every frame, so rebuild the static
+  world separately below.
+*/
 
-document.getElementById("loading").style.display="none";
+/* Save static world */
+const staticObjects=objects.slice();
 
-requestAnimationFrame(loop);
+/* Replace dynamic rendering with static + car */
+function renderFrame(now){
+
+  const dt=Math.min((now-previous)/1000,.05);
+  previous=now;
+
+  updateCar(dt);
+
+  sky();
+
+  const aspect=canvas.width/canvas.height;
+
+  const proj=perspective(
+    Math.PI/3,
+    aspect,
+    .1,
+    900
+  );
+
+  updateCamera();
+
+  const view=lookAt(
+    camera,
+    [car.x,car.y,car.z],
+    [0,1,0]
+  );
+
+  const vp=multiply(proj,view);
+
+  gl.uniform3f(uLight,-120,180,-100);
+  gl.uniform3f(uCamera,camera[0],camera[1],camera[2]);
+
+  for(const o of staticObjects){
+    drawObject(o,vp);
+  }
+
+  /* temporary car geometry */
+  const before=objects.length;
+  drawCar();
+
+  for(let i=staticObjects.length;i<objects.length;i++){
+    drawObject(objects[i],vp);
+  }
+
+  objects.length=before;
+
+  document.getElementById("speed").textContent =
+    "السرعة: "+
+    Math.round(Math.abs(car.speed)*4)+
+    " كم/س";
+
+  if(car.z<70){
+    document.getElementById("location").textContent=
+      "📍 مركز قضاء الحضر";
+  }else if(car.z<190){
+    document.getElementById("location").textContent=
+      "📍 أطراف مركز القضاء";
+  }else{
+    document.getElementById("location").textContent=
+      "📍 طريق الحضر";
+  }
+
+  requestAnimationFrame(renderFrame);
+}
+
+requestAnimationFrame(renderFrame);
 
 </script>
 </body>
